@@ -1,0 +1,103 @@
+module Main exposing (main)
+
+import Browser
+import Browser.Navigation as Nav
+import Element
+import Url exposing (Url)
+
+
+main : Program () Model Msg
+main =
+    Browser.application
+        { view = view
+        , update = update
+        , init = init
+        , subscriptions = subscriptions
+        , onUrlRequest = UrlRequested
+        , onUrlChange = UrlChanged
+        }
+
+
+
+-- MODEL
+
+
+type alias Model =
+    { route : String
+    , navKey : Nav.Key
+    , state : State
+    }
+
+
+type State
+    = Initializing
+
+
+type alias UserModel =
+    ()
+
+
+
+-- INIT
+
+
+init : () -> Url -> Nav.Key -> ( Model, Cmd Msg )
+init _ url navKey =
+    ( { route = Url.toString url
+      , navKey = navKey
+      , state = Initializing
+      }
+    , Cmd.none
+    )
+
+
+
+-- MSG
+
+
+type Msg
+    = UrlRequested Browser.UrlRequest
+    | UrlChanged Url
+
+
+
+-- UPDATE
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        UrlChanged url ->
+            ( { model | route = Url.toString url }, Cmd.none )
+
+        UrlRequested (Browser.Internal url) ->
+            ( model, Nav.pushUrl model.navKey (Url.toString url) )
+
+        UrlRequested (Browser.External href) ->
+            ( model, Nav.load href )
+
+
+
+-- VIEW
+
+
+view : Model -> Browser.Document Msg
+view model =
+    { title = "Full stack"
+    , body =
+        [ Element.layout
+            [ Element.width Element.fill
+            , Element.height Element.fill
+            ]
+            (Element.text "test")
+        ]
+    }
+
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.none
