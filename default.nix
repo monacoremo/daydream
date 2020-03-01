@@ -15,8 +15,12 @@ rec {
         ps: [
           ps.pytest
           ps.requests
+          ps.selenium
         ]
       );
+
+  geckodriver =
+    pkgs.geckodriver;
 
   postgrest =
     pkgs.callPackage deploy/postgrest.nix {};

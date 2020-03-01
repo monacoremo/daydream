@@ -11,7 +11,7 @@ import requests
 import pytest
 
 
-BASE_URL = os.environ.get('FULLSTACK_URI', 'http://localhost:8000/')
+BASE_URL = os.environ.get('FULLSTACK_URI', 'http://localhost:8000')
 
 
 def test_index():

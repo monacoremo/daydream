@@ -73,7 +73,7 @@ rec {
             label="''${args[0]}"
             color="''${args[1]}"
             logfile="''${args[2]}"
-            stdbuf -oL -eL tail -n +1 -F "$logfile" | while read -r line; do
+            stdbuf -oL -eL tail -F "$logfile" | while read -r line; do
               (
                 # acquire a write lock to make sure that lines are not mixed up
                 ${utillinux}/bin/flock 3

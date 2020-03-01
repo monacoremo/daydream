@@ -31,7 +31,9 @@ pkgs.stdenv.mkDerivation {
     fullstack.webapp.watch
     fullstack.tests.run
     fullstack.tests.watch
+    fullstack.geckodriver
     pkgs.bash
+    pkgs.firefox
     pkgs.curl
     pkgs.entr
     pkgs.elmPackages.elm
