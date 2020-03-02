@@ -4,8 +4,8 @@ utillinux, writeText, envsubst, unixtools, python }:
 
 
 let
-  multilog =
-    ./multilog.py;
+  logmux =
+    ./logmux.py;
 in
 rec {
   run =
@@ -46,7 +46,7 @@ rec {
   tailLogs =
     checkedShellScript.writeBin "fullstack-local-taillogs"
       ''
-        ${python}/bin/python ${multilog} \
+        ${python}/bin/python ${logmux} \
             "$FULLSTACK_DB_LOGFILE?label=db&color=red" \
             "$FULLSTACK_API_LOGFILE?label=api&color=blue" \
             "$FULLSTACK_INGRESS_LOGFILE?label=ingress&color=green" \
@@ -63,12 +63,6 @@ rec {
         true > "$FULLSTACK_API_LOGFILE"
         true > "$FULLSTACK_INGRESS_LOGFILE"
         true > "$FULLSTACK_WEBAPP_LOGFILE"
-      '';
-
-
-  logsConfig =
-    writeText "logs.conf"
-      ''
       '';
 
   mkEnv =

@@ -1,5 +1,5 @@
 '''
-Multilog: Tail multiple log files and label their lines.
+Tail multiple log files and label their lines.
 
 '''
 
@@ -56,7 +56,8 @@ def main(logpath):
             poll.register(pipe, select.POLLIN)
 
         if not logfiles:
-            return
+            # Wait indefinitely
+            poll.poll()
 
         maxlabel = max(len(logfile.label) for logfile in logfiles.values())
 
