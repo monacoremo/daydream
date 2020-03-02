@@ -16,6 +16,7 @@ rec {
           ps.pytest
           ps.requests
           ps.selenium
+          ps.click
         ]
       );
 
@@ -41,7 +42,7 @@ rec {
     pkgs.callPackage deploy/checked-shell-script.nix {};
 
   deployLocal =
-    pkgs.callPackage deploy/local.nix { inherit checkedShellScript; }
+    pkgs.callPackage deploy/local.nix { inherit checkedShellScript python; }
       { inherit db api ingress webapp; };
 
   tests =

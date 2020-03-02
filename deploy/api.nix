@@ -17,7 +17,7 @@ rec {
   run =
     checkedShellScript.writeBin "fullstack-api-run"
       ''
-        mkdir "$FULLSTACK_API_DIR"
+        mkdir -p "$FULLSTACK_API_DIR"
         exec ${postgrest}/bin/postgrest ${postgrestConf}
       '';
 

@@ -1,7 +1,12 @@
 { stdenv, checkedShellScript, runtimeShell, shellcheck, pwgen, ncurses,
-utillinux, writeText, envsubst, unixtools }:
+utillinux, writeText, envsubst, unixtools, python }:
 { db, api, ingress, webapp }:
 
+
+let
+  multilog =
+    ./multilog.py;
+in
 rec {
   run =
     checkedShellScript.writeBin "fullstack-local-run"
@@ -41,7 +46,12 @@ rec {
   tailLogs =
     checkedShellScript.writeBin "fullstack-local-taillogs"
       ''
-        ${envsubst}/bin/envsubst < ${logsConfig} | ${tailLogsHelper} &
+        ${python}/bin/python ${multilog} \
+            "$FULLSTACK_DB_LOGFILE?label=db&color=red" \
+            "$FULLSTACK_API_LOGFILE?label=api&color=blue" \
+            "$FULLSTACK_INGRESS_LOGFILE?label=ingress&color=green" \
+            "$FULLSTACK_INGRESS_DIR/logs/access.log?label=ingress-access&color=bright_green" \
+            "$FULLSTACK_WEBAPP_LOGFILE?label=webapp&color=cyan"
       '';
 
   resetLogs =
@@ -55,55 +65,10 @@ rec {
         true > "$FULLSTACK_WEBAPP_LOGFILE"
       '';
 
-  tailLogsHelper =
-    checkedShellScript.write "fullstack-local-taillogs-helper"
-      ''
-        lockfile="$(mktemp)"
-
-        function stop () {
-            echo
-            kill 0
-            rm -f "$lockfile"
-        };
-
-        trap stop exit int
-
-        while read -r logconfig; do
-            IFS=' ' read -ra args <<< "$logconfig"
-            label="''${args[0]}"
-            color="''${args[1]}"
-            logfile="''${args[2]}"
-            stdbuf -oL -eL tail -F "$logfile" | while read -r line; do
-              (
-                # acquire a write lock to make sure that lines are not mixed up
-                ${utillinux}/bin/flock 3
-
-                if [[ $TERM ]]; then
-                    ${ncurses}/bin/tput setaf "$color"
-                fi
-
-                printf "%s %s: " "$(date -Iseconds)" "$label"
-
-                if [[ $TERM ]]; then
-                    ${ncurses}/bin/tput sgr0
-                fi
-
-                echo "$line"
-              ) 3>"$lockfile";
-            done &
-        done
-
-        wait
-      '';
 
   logsConfig =
     writeText "logs.conf"
       ''
-        db 2 $FULLSTACK_DB_LOGFILE
-        api 3 $FULLSTACK_API_LOGFILE
-        ingress 5 $FULLSTACK_INGRESS_LOGFILE
-        ingress-access 6 $FULLSTACK_INGRESS_DIR/logs/access.log
-        webapp 9 $FULLSTACK_WEBAPP_LOGFILE
       '';
 
   mkEnv =
@@ -124,7 +89,7 @@ rec {
         export FULLSTACK_URI="http://localhost:\$FULLSTACK_PORT"
         export FULLSTACK_DB_DIR="\$FULLSTACK_DIR/db"
         export FULLSTACK_DB_LOGFILE="\$FULLSTACK_DIR/db.log"
-        export FULLSTACK_DB_SRC="$sourcedir/app.sql.md"
+        export FULLSTACK_DB_SRC="$sourcedir/db/app.sql.md"
         export FULLSTACK_DB_HOST="\$FULLSTACK_DB_DIR"
         export FULLSTACK_DB_DBNAME=postgres
         export FULLSTACK_DB_SUPERUSER=postgres
