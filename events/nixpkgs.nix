@@ -11,16 +11,5 @@ let
       url = "https://github.com/nixos/nixpkgs/archive/${config.rev}.tar.gz";
       sha256 = config.tarballHash;
     };
-
-  pkgs =
-    import pinnedPkgs { config = { packageOverrides = packageOverrides; }; };
-
-  packageOverrides = pkgs: rec {
-    haskellPackages = pkgs.haskellPackages.override {
-      overrides = haskellPackagesNew: haskellPackagesOld: rec {
-      };
-    };
-  };
 in
-{ events = pkgs.haskellPackages.callPackage ./project.nix {};
-}
+import pinnedPkgs
