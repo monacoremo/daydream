@@ -1,11 +1,9 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Main where
 
-
-import qualified Events.Command as Command
-import Data.Aeson (encode)
-
+import Events.Server (run)
 
 main :: IO ()
-main = print $ encode $ Command.CreateTree "test"
+main =
+    do
+        putStrLn "Running server on port 8080..."
+        run 8080

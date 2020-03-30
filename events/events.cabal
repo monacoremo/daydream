@@ -15,9 +15,14 @@ executable events
     base >=4.13 && <4.14,
     hasql,
     servant,
+    servant-server,
+    servant-to-elm,
     aeson,
+    warp,
+    wai,
     text
   other-modules:
     Events.Command,
-    Events.Message
+    Events.Message,
+    Events.Server
   default-language: Haskell2010
