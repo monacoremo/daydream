@@ -83,7 +83,7 @@ rec {
         export FULLSTACK_URI="http://localhost:\$FULLSTACK_PORT"
         export FULLSTACK_DB_DIR="\$FULLSTACK_DIR/db"
         export FULLSTACK_DB_LOGFILE="\$FULLSTACK_DIR/db.log"
-        export FULLSTACK_DB_SRC="$sourcedir/db/app.sql.md"
+        export FULLSTACK_DB_SRC="$sourcedir/db"
         export FULLSTACK_DB_HOST="\$FULLSTACK_DB_DIR"
         export FULLSTACK_DB_DBNAME=postgres
         export FULLSTACK_DB_SUPERUSER=postgres

@@ -24,7 +24,7 @@ rec {
   run =
     checkedShellScript.writeBin "fullstack-db-run"
       ''
-        set -e
+        set -euo pipefail
 
         export PGDATA="$FULLSTACK_DB_DIR"
         export PGHOST="$FULLSTACK_DB_HOST"
@@ -50,16 +50,17 @@ rec {
 
         rm "$pwfile"
 
-        # Convert the .sql.md script to .sql
-        sed -f ${md2sql} <"$FULLSTACK_DB_SRC" >"$FULLSTACK_DB_DIR"/app.sql
-
         mkdir -p "$FULLSTACK_DB_SETUPHOST"
 
         ${postgresql}/bin/pg_ctl start \
           -o "-F -c listen_addresses=\"\" -k $FULLSTACK_DB_SETUPHOST"
 
-        ${postgresql}/bin/psql "$FULLSTACK_DB_SUPERUSER_SETUP_URI" \
-          -f "$FULLSTACK_DB_DIR/app.sql"
+        for f in "$FULLSTACK_DB_SRC"/*.sql.md; do
+          filename=$(basename -- "$f")
+          targetpath="$FULLSTACK_DB_DIR/$filename.sql"
+          sed -f ${md2sql} <"$f" >"$targetpath"
+          ${postgresql}/bin/psql "$FULLSTACK_DB_SUPERUSER_SETUP_URI" -f "$targetpath"
+        done
 
         ${postgresql}/bin/psql "$FULLSTACK_DB_SUPERUSER_SETUP_URI" << EOF
           alter role authenticator with password '$FULLSTACK_DB_APISERVER_PW';
