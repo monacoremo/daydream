@@ -61,14 +61,14 @@ options =
 
 instance HasElmType Command where
     elmDefinition =
-        Just $ deriveElmTypeDefinition @Command defaultOptions "Api.Command.Command"
+        Just $ deriveElmTypeDefinition @Command defaultOptions "Api.Types.Command.Command"
 
 instance HasElmDecoder Aeson.Value Command where
     elmDecoderDefinition =
-        Just $ deriveElmJSONDecoder @Command defaultOptions Aeson.defaultOptions "Api.Command.decoder"
+        Just $ deriveElmJSONDecoder @Command defaultOptions Aeson.defaultOptions "Api.Types.Command.decoder"
 
 instance HasElmEncoder Aeson.Value Command where
     elmEncoderDefinition =
-        Just $ deriveElmJSONEncoder @Command defaultOptions Aeson.defaultOptions "Api.Command.encoder"
+        Just $ deriveElmJSONEncoder @Command defaultOptions Aeson.defaultOptions "Api.Types.Command.encoder"
 
 

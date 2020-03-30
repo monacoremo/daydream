@@ -1,6 +1,4 @@
 {-# language DataKinds #-}
-{-# language DeriveAnyClass #-}
-{-# language DeriveGeneric #-}
 {-# language MultiParamTypeClasses #-}
 {-# language OverloadedStrings #-}
 {-# language TypeApplications #-}
@@ -24,15 +22,17 @@ import Events.Command (Command (..))
 
 
 main :: IO ()
-main = do
+main =
   let
     definitions =
-      map (elmEndpointDefinition "Config.urlBase" ["Api"]) (elmEndpoints @API)
+      map (elmEndpointDefinition "Config.urlBase" ["Api", "Events"]) (elmEndpoints @API)
       <> jsonDefinitions @Command
 
     modules =
       Pretty.modules $
         Simplification.simplifyDefinition <$> definitions
-
-  forM_ (HashMap.toList modules) $ \(_moduleName, contents) ->
-    print contents
+  in
+  forM_ (HashMap.toList modules) $ \(moduleName, contents) ->
+    do
+        print moduleName
+        print contents

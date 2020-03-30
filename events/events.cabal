@@ -18,6 +18,10 @@ executable events
     servant-server,
     servant-to-elm,
     aeson,
+    unordered-containers,
+    generics-sop,
+    elm-syntax,
+    haskell-to-elm,
     warp,
     wai,
     text
