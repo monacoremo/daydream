@@ -6,7 +6,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
 
-module Events.Server (run) where
+module Events.Server (API, run) where
 
 import qualified Data.Text as Text
 import Data.Text (Text)

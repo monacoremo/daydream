@@ -1,7 +1,22 @@
-{-# LANGUAGE DeriveGeneric #-}
+{-# language DataKinds #-}
+{-# language DeriveAnyClass #-}
+{-# language DeriveGeneric #-}
+{-# language MultiParamTypeClasses #-}
+{-# language OverloadedStrings #-}
+{-# language TypeApplications #-}
+{-# language TypeOperators #-}
 
 module Events.Command (Command (..)) where
 
+import Data.Foldable
+import qualified Data.HashMap.Lazy as HashMap
+import qualified Generics.SOP as SOP
+import Servant.API
+
+import qualified Language.Elm.Pretty as Pretty
+import qualified Language.Elm.Simplification as Simplification
+import Language.Haskell.To.Elm
+import Servant.To.Elm
 import Data.Text (Text)
 import Data.Aeson (ToJSON, FromJSON)
 import qualified Data.Aeson as Aeson
@@ -22,7 +37,7 @@ data Command
         { nodeId :: Int
         , parentId :: Int
         }
-    deriving (Show, Eq, Generic)
+    deriving (Show, Eq, Generic, SOP.Generic, SOP.HasDatatypeInfo)
 
 
 instance FromJSON Command where
@@ -42,3 +57,18 @@ options =
         , Aeson.sumEncoding = Aeson.TaggedObject "command" "value"
         , Aeson.tagSingleConstructors = True
         }
+
+
+instance HasElmType Command where
+    elmDefinition =
+        Just $ deriveElmTypeDefinition @Command defaultOptions "Api.Command.Command"
+
+instance HasElmDecoder Aeson.Value Command where
+    elmDecoderDefinition =
+        Just $ deriveElmJSONDecoder @Command defaultOptions Aeson.defaultOptions "Api.Command.decoder"
+
+instance HasElmEncoder Aeson.Value Command where
+    elmEncoderDefinition =
+        Just $ deriveElmJSONEncoder @Command defaultOptions Aeson.defaultOptions "Api.Command.encoder"
+
+
