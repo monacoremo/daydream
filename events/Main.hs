@@ -1,6 +1,11 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Main where
 
-import qualified Events.Commands
+
+import qualified Events.Command as Command
+import Data.Aeson (encode)
+
 
 main :: IO ()
-main = putStrLn "Hello, Haskell!"
+main = print $ encode $ Command.CreateTree "test"
