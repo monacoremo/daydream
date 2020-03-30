@@ -1,0 +1,17 @@
+cabal-version: >=1.10
+
+name: events
+version: 0.1.0.0
+description: Events handling
+license: MIT
+author: Remo
+maintainer: Remo
+copyright: Remo
+build-type: Simple
+
+executable events
+  main-is: Main.hs
+  build-depends:
+    base >=4.13 && <4.14,
+    hasql
+  default-language: Haskell2010
