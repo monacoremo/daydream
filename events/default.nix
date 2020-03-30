@@ -9,5 +9,5 @@ let
     };
   };
 in
-{ events = pkgs.haskellPackages.callPackage ./project.nix {};
+{ events = pkgs.haskellPackages.callCabal2nix "events" ./. {};
 }
