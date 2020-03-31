@@ -27,7 +27,8 @@ library
     aeson-pretty,
     directory,
     bytestring,
-    hasql-transaction
+    hasql-transaction,
+    mtl
   default-language: Haskell2010
 
 executable postgrest-to-elm

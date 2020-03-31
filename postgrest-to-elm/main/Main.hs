@@ -18,6 +18,11 @@ import qualified Language.Elm.Pretty as Elm
 import qualified Language.Elm.Simplification as Elm
 import qualified Options.Applicative as OptParse
 import qualified System.FilePath.Posix as FilePath
+import Data.Text.Encoding (encodeUtf8)
+
+import qualified PostgrestToElm.DbStructure as DbStructure
+import qualified PostgrestToElm.ApiStructure as ApiStructure
+import qualified PostgrestToElm.Codegen as Codegen
 
 
 main :: IO ()
@@ -36,7 +41,16 @@ run options =
                 PrintOutput ->
                     printElmModule
     in
-    mapM_ (uncurry outputOp) []
+    do
+        dbStructure <-
+            DbStructure.get
+                (encodeUtf8 $ dburi options)
+                [schema options]
+                (role options)
+
+        modules <- return []
+
+        mapM_ (uncurry outputOp) modules
 
 
 writeElmModule :: FilePath -> Elm.Module -> Doc Text -> IO ()
