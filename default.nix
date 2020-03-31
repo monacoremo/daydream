@@ -23,11 +23,14 @@ rec {
   geckodriver =
     pkgs.geckodriver;
 
+  events =
+    (import ./events/default.nix).events;
+
   postgrest =
     pkgs.callPackage deploy/postgrest.nix {};
 
   webapp =
-    pkgs.callPackage deploy/webapp.nix {};
+    pkgs.callPackage deploy/webapp.nix { inherit events; };
 
   ingress =
     pkgs.callPackage deploy/ingress.nix { inherit checkedShellScript; };

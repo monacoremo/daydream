@@ -1,10 +1,10 @@
-{ writeShellScriptBin, elmPackages, entr }:
+{ writeShellScriptBin, elmPackages, entr, events }:
 
 rec {
   build =
     writeShellScriptBin "fullstack-webapp-build"
       ''
-        set -e
+        set -euo pipefail
 
         srcdir="$FULLSTACK_WEBAPP_SRC"
         workdir="$FULLSTACK_WEBAPP_DIR"
@@ -13,6 +13,8 @@ rec {
         mkdir -p "$workdir" "$webroot"
         ln -sf "$srcdir"/{elm.json,src} "$workdir"
         ln -sf "$srcdir"/index.html "$webroot"/index.html
+
+        ${events}/bin/elmgen --target-directory "$workdir/src"
 
         cd "$workdir"
 
