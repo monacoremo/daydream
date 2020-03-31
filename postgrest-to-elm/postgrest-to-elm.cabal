@@ -12,7 +12,9 @@ build-type: Simple
 library
   hs-source-dirs: src
   exposed-modules:
-    PostgrestToElm.DbStructure
+    PostgrestToElm.DbStructure,
+    PostgrestToElm.ApiStructure,
+    PostgrestToElm.Codegen
   build-depends:
     aeson,
     base >=4.13 && <4.14,
@@ -20,7 +22,12 @@ library
     generics-sop,
     text,
     hasql,
-    postgrest
+    postgrest,
+    unordered-containers,
+    aeson-pretty,
+    directory,
+    bytestring,
+    hasql-transaction
   default-language: Haskell2010
 
 executable postgrest-to-elm
@@ -28,5 +35,12 @@ executable postgrest-to-elm
   hs-source-dirs: main
   build-depends:
     postgrest-to-elm,
-    base >=4.13 && <4.14
+    base >=4.13 && <4.14,
+    optparse-applicative,
+    elm-syntax,
+    filepath,
+    text,
+    directory,
+    prettyprinter,
+    unordered-containers
   default-language: Haskell2010
