@@ -42,16 +42,16 @@ data Command
 
 instance FromJSON Command where
     parseJSON =
-        Aeson.genericParseJSON options
+        Aeson.genericParseJSON aesonOptions
 
 
 instance ToJSON Command where
     toJSON =
-        Aeson.genericToJSON options
+        Aeson.genericToJSON aesonOptions
 
 
-options :: Aeson.Options
-options =
+aesonOptions :: Aeson.Options
+aesonOptions =
     Aeson.defaultOptions
         { Aeson.constructorTagModifier = Aeson.camelTo2 '_'
         , Aeson.sumEncoding = Aeson.TaggedObject "command" "value"
@@ -63,12 +63,12 @@ instance HasElmType Command where
     elmDefinition =
         Just $ deriveElmTypeDefinition @Command defaultOptions "Api.Types.Command.Command"
 
+
 instance HasElmDecoder Aeson.Value Command where
     elmDecoderDefinition =
-        Just $ deriveElmJSONDecoder @Command defaultOptions Aeson.defaultOptions "Api.Types.Command.decoder"
+        Just $ deriveElmJSONDecoder @Command defaultOptions aesonOptions "Api.Types.Command.decoder"
+
 
 instance HasElmEncoder Aeson.Value Command where
     elmEncoderDefinition =
-        Just $ deriveElmJSONEncoder @Command defaultOptions Aeson.defaultOptions "Api.Types.Command.encoder"
-
-
+        Just $ deriveElmJSONEncoder @Command defaultOptions aesonOptions "Api.Types.Command.encoder"
