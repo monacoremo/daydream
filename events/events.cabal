@@ -48,7 +48,9 @@ executable elmgen
     wai,
     optparse-applicative,
     prettyprinter,
-    text
+    text,
+    directory,
+    filepath
   other-modules:
     Events.Command,
     Events.Message,

@@ -6,9 +6,9 @@
 module Main where
 
 import Control.Applicative ((<|>))
-import Data.Foldable (forM_)
+import Data.Foldable (mapM_, forM_)
 import Data.Semigroup ((<>))
-import Data.Text (Text, pack)
+import Data.Text (Text, unpack)
 import Data.Text.Prettyprint.Doc (Doc)
 import Events.Command (Command (..))
 import Events.Server (API)
@@ -21,6 +21,8 @@ import qualified Language.Elm.Simplification as Elm
 import qualified Language.Haskell.To.Elm as HaskellToElm
 import qualified Options.Applicative as OptParse
 import qualified Servant.To.Elm as ServantToElm
+import System.Directory (createDirectoryIfMissing)
+import qualified System.FilePath.Posix as FilePath
 
 
 main :: IO ()
@@ -32,13 +34,30 @@ run :: Options -> IO ()
 run options =
     case options of
         FileOutput targetDir ->
-            putStrLn "Generating Elm modules..."
+            mapM_ (uncurry $ writeElmModule targetDir) modules
 
         PrintOutput ->
             forM_ modules $ \(moduleName, contents) ->
                 do
                     print moduleName
                     print contents
+
+
+writeElmModule :: FilePath -> Elm.Module -> Doc Text -> IO ()
+writeElmModule targetDir moduleName contents =
+    let
+        modulePath =
+            map unpack moduleName
+
+        dirPath =
+            FilePath.joinPath (targetDir : init modulePath)
+
+        filePath =
+            FilePath.joinPath [dirPath, last modulePath ++ ".elm"]
+    in
+    do
+        createDirectoryIfMissing True dirPath
+        writeFile filePath . show $ contents
 
 
 
@@ -59,7 +78,7 @@ modules =
 
 
 
--- CLI PARSER
+-- CLI OPTIONS PARSER
 
 
 data Options
