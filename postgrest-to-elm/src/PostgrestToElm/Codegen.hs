@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module PostgrestToElm.Codegen
-    ( apiToElm
+    ( fromApiStructure
     ) where
 
 import Data.Text (Text)
@@ -22,8 +22,15 @@ import qualified Hasql.Transaction.Sessions as HT
 import qualified PostgREST.Types as PostgREST
 import qualified Data.Maybe as Maybe
 import qualified Data.HashMap.Strict as HashMap
+import qualified Language.Elm.Name as Elm
+import Data.Text.Prettyprint.Doc (Doc)
 
 import PostgrestToElm.ApiStructure (ApiStructure (..), ApiTable (..))
+
+
+fromApiStructure :: ApiStructure -> [(Elm.Module, Doc Text)]
+fromApiStructure apiStructure =
+    []
 
 
 data ElmModule =

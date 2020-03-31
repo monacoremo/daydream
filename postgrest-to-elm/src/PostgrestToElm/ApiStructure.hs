@@ -5,6 +5,7 @@ module PostgrestToElm.ApiStructure
     ( ApiStructure (..)
     , ApiTable (..)
     , ApiProc (..)
+    , fromDbStructure
     ) where
 
 import Data.Text (Text)
@@ -15,7 +16,7 @@ import qualified Data.Aeson as Aeson
 import qualified PostgREST.Types as PostgREST
 import qualified Data.Maybe as Maybe
 import qualified Data.HashMap.Strict as HashMap
-
+import qualified Hasql.Connection as Hasql
 
 
 -- API TYPES
@@ -68,9 +69,9 @@ data ApiProcArg =
 
 -- CONVERT POSTGREST TO API TYPES
 
-parseDbStructure :: Text -> PostgREST.DbStructure -> ApiStructure
-parseDbStructure schema dbStructure =
-    ApiStructure
+fromDbStructure :: Text -> Hasql.Connection -> PostgREST.DbStructure -> IO ApiStructure
+fromDbStructure schema _ dbStructure =
+    return ApiStructure
         { apiTables =
             map (parseTable dbStructure) $
                 filter (\t -> PostgREST.tableSchema t == schema) $

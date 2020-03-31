@@ -22,11 +22,9 @@ import qualified Data.Maybe as Maybe
 import qualified Data.HashMap.Strict as HashMap
 
 
-get :: Connection.Settings -> [PostgREST.Schema] -> Text -> IO PostgREST.DbStructure
-get settings schema role =
+get :: Connection.Connection -> [PostgREST.Schema] -> Text -> IO PostgREST.DbStructure
+get connection schema role =
     do
-        Right connection <- Connection.acquire settings
-
         Right pgVersion <- Session.run getPgVersion connection
 
         Right dbStructure <- Session.run

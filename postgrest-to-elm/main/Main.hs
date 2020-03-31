@@ -19,6 +19,7 @@ import qualified Language.Elm.Simplification as Elm
 import qualified Options.Applicative as OptParse
 import qualified System.FilePath.Posix as FilePath
 import Data.Text.Encoding (encodeUtf8)
+import qualified Hasql.Connection as Connection
 
 import qualified PostgrestToElm.DbStructure as DbStructure
 import qualified PostgrestToElm.ApiStructure as ApiStructure
@@ -42,15 +43,22 @@ run options =
                     printElmModule
     in
     do
+        Right connection <- Connection.acquire (encodeUtf8 $ dburi options)
+
         dbStructure <-
             DbStructure.get
-                (encodeUtf8 $ dburi options)
+                connection
                 [schema options]
                 (role options)
 
-        modules <- return []
 
-        mapM_ (uncurry outputOp) modules
+        apiStructure <-
+            ApiStructure.fromDbStructure
+                (schema options)
+                connection
+                dbStructure
+
+        mapM_ (uncurry outputOp) (Codegen.fromApiStructure apiStructure)
 
 
 writeElmModule :: FilePath -> Elm.Module -> Doc Text -> IO ()
