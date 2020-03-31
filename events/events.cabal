@@ -46,6 +46,8 @@ executable elmgen
     haskell-to-elm,
     warp,
     wai,
+    optparse-applicative,
+    prettyprinter,
     text
   other-modules:
     Events.Command,

@@ -29,6 +29,7 @@ data Command
         }
     | AppendLeaf
         { parentId :: Int
+        , label :: Text
         }
     | DeleteNode
         { nodeId :: Int
