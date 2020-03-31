@@ -6,13 +6,15 @@
 module Main where
 
 import Control.Applicative ((<|>))
-import Data.Foldable (mapM_, forM_)
+import Data.Foldable (mapM_)
 import Data.Semigroup ((<>))
-import Data.Text (Text, unpack)
+import Data.Text (Text, unpack, intercalate, append)
 import Data.Text.Prettyprint.Doc (Doc)
 import Events.Command (Command (..))
 import Events.Server (API)
+import System.Directory (createDirectoryIfMissing)
 import qualified Data.HashMap.Lazy as HashMap
+import qualified Data.Text.IO as Text
 import qualified Language.Elm.Definition as Elm
 import qualified Language.Elm.Name as Elm
 import qualified Language.Elm.Pretty as Elm
@@ -20,7 +22,6 @@ import qualified Language.Elm.Simplification as Elm
 import qualified Language.Haskell.To.Elm as HaskellToElm
 import qualified Options.Applicative as OptParse
 import qualified Servant.To.Elm as ServantToElm
-import System.Directory (createDirectoryIfMissing)
 import qualified System.FilePath.Posix as FilePath
 
 
@@ -31,15 +32,16 @@ main =
 
 run :: Options -> IO ()
 run options =
-    case options of
-        FileOutput targetDir ->
-            mapM_ (uncurry $ writeElmModule targetDir) modules
+    let
+        op =
+            case options of
+                FileOutput targetDir ->
+                    writeElmModule targetDir
 
-        PrintOutput ->
-            forM_ modules $ \(moduleName, contents) ->
-                do
-                    print moduleName
-                    print contents
+                PrintOutput ->
+                    printElmModule
+    in
+    mapM_ (uncurry op) modules
 
 
 writeElmModule :: FilePath -> Elm.Module -> Doc Text -> IO ()
@@ -57,6 +59,16 @@ writeElmModule targetDir moduleName contents =
     do
         createDirectoryIfMissing True dirPath
         writeFile filePath . show $ contents
+
+
+printElmModule :: Elm.Module -> Doc Text -> IO ()
+printElmModule moduleName contents =
+    do
+        Text.putStrLn ""
+        Text.putStrLn $ append "### Module " (intercalate "." moduleName)
+        Text.putStrLn ""
+        print contents
+        Text.putStrLn ""
 
 
 
