@@ -12,7 +12,6 @@ import Data.Text (Text, unpack)
 import Data.Text.Prettyprint.Doc (Doc)
 import Events.Command (Command (..))
 import Events.Server (API)
-import qualified Data.Aeson as Aeson
 import qualified Data.HashMap.Lazy as HashMap
 import qualified Language.Elm.Definition as Elm
 import qualified Language.Elm.Name as Elm
