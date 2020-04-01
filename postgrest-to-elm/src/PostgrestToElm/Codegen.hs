@@ -40,15 +40,30 @@ apiToElm modulePath apiStructure =
 apiTableToElm :: Elm.Module -> ApiTable -> [Elm.Definition]
 apiTableToElm rootModuleName apiTable =
     let
-        moduleName =
-            rootModuleName ++ [toPascal $ apiTableName apiTable]
+        typeName =
+            toPascal $ apiTableName apiTable
 
-        qualified =
-            Elm.Qualified moduleName
+        typeModuleName =
+            rootModuleName ++ ["Types", typeName]
+
+        endpointModuleName =
+            rootModuleName ++ [typeName]
+
+        typeQualified =
+            Elm.Qualified typeModuleName
+
+        endpointQualified =
+            Elm.Qualified endpointModuleName
     in
     [ Elm.Constant
-        (qualified "get")
+        (endpointQualified "get")
         0
-        (Bound.toScope $ vacuous $ ElmType.Global (qualified "Test"))
+        (Bound.toScope $ vacuous $ ElmType.Global (endpointQualified "Test"))
         (Elm.List [])
+    , Elm.Alias
+        (typeQualified typeName)
+        0
+        (Bound.toScope $ vacuous $ ElmType.Record
+            [(Elm.Field "field", ElmType.Global (typeQualified "Test"))]
+        )
     ]
