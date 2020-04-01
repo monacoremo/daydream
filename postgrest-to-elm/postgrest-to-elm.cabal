@@ -29,7 +29,8 @@ library
     directory,
     bytestring,
     hasql-transaction,
-    bound
+    bound,
+    text-manipulate
   default-language: Haskell2010
 
 executable postgrest-to-elm
