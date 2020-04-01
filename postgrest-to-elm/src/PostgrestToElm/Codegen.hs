@@ -23,74 +23,42 @@ import qualified PostgREST.Types as PostgREST
 import qualified Data.Maybe as Maybe
 import qualified Data.HashMap.Strict as HashMap
 import qualified Language.Elm.Name as Elm
+import qualified Language.Elm.Pretty as Elm
+import qualified Language.Elm.Simplification as Elm
+import qualified Language.Elm.Definition as Elm
+import qualified Language.Elm.Type as ElmType
+import qualified Language.Elm.Expression as Elm
 import Data.Text.Prettyprint.Doc (Doc)
+import qualified Bound
+import Data.Void (vacuous)
 
 import PostgrestToElm.ApiStructure (ApiStructure (..), ApiTable (..))
 
 
 fromApiStructure :: ApiStructure -> [(Elm.Module, Doc Text)]
 fromApiStructure apiStructure =
-    []
+    modules $ apiToElm ["Api"] apiStructure
 
 
-data ElmModule =
-    ElmModule
-        { elmModuleName :: Text
-        , elmModulePath :: [Text]
-        , elmModuleDeclarations :: [ElmDeclaration]
-        }
-        deriving (Show, Eq)
-
-data ElmDeclaration =
-    ElmDeclaration
-        { elmDeclarationName :: Text
-        , elmDeclarationExposed :: Bool
-        , elmDeclarationType :: Text
-        , elmDeclarationParams :: [Text]
-        , elmDeclarationExpr :: Text
-        }
-        deriving (Show, Eq)
+modules :: [Elm.Definition] -> [(Elm.Module, Doc Text)]
+modules definitions =
+    HashMap.toList . Elm.modules $ Elm.simplifyDefinition <$> definitions
 
 
-apiToElm :: [Text] -> ApiStructure -> [ElmModule]
+apiToElm :: Elm.Module -> ApiStructure -> [Elm.Definition]
 apiToElm modulePath apiStructure =
     concatMap (apiTableToElm modulePath) (apiTables apiStructure)
 
 
-apiTableToElm :: [Text] -> ApiTable -> [ElmModule]
-apiTableToElm modulePath apiTable =
-    [ ElmModule
-        { elmModulePath = modulePath ++ ["Types"]
-        , elmModuleName = apiTableName apiTable
-        , elmModuleDeclarations = []
-        }
-    ]
-
-elmModuleCode :: ElmModule -> Text
-elmModuleCode elmModule =
-    Text.concat
-        [ elmModuleName elmModule
-        , "\ntest"
-        ]
-
-elmModuleFilePath :: ElmModule -> FilePath
-elmModuleFilePath elmModule =
-    Text.unpack . Text.intercalate "/" $ elmModulePath elmModule
-
-elmModuleFileName :: ElmModule -> FilePath
-elmModuleFileName elmModule =
-    elmModuleFilePath elmModule
-    ++ "/" ++ Text.unpack (elmModuleName elmModule) ++ ".elm"
-
-writeElmModule :: FilePath -> ElmModule -> IO ()
-writeElmModule basePath elmModule =
+apiTableToElm :: Elm.Module -> ApiTable -> [Elm.Definition]
+apiTableToElm rootModuleName apiTable =
     let
-        dir =
-            basePath ++ Text.unpack (Text.intercalate "/" (elmModulePath elmModule))
+        moduleName =
+            rootModuleName ++ [apiTableName apiTable]
     in
-    do
-        createDirectoryIfMissing True dir
-
-        writeFile
-            (dir ++ "/" ++ Text.unpack (elmModuleName elmModule) ++ ".elm")
-            (Text.unpack (elmModuleCode elmModule))
+    [ Elm.Constant
+        (Elm.Qualified moduleName "get")
+        0
+        (Bound.toScope $ vacuous $ ElmType.Global (Elm.Qualified moduleName "Test"))
+        (Elm.List [])
+    ]

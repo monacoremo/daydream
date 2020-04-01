@@ -51,7 +51,6 @@ run options =
                 [schema options]
                 (role options)
 
-
         apiStructure <-
             ApiStructure.fromDbStructure
                 (schema options)
