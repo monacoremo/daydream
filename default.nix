@@ -1,6 +1,8 @@
 { pkgs }:
 
 rec {
+  appName = "daydream";
+
   postgresql =
     pkgs.postgresql_12.withPackages
       (
@@ -22,8 +24,6 @@ rec {
 
   geckodriver =
     pkgs.geckodriver;
-
-  appName = "fullstack";
 
   settings =
     pkgs.callPackage deploy/settings.nix { inherit appName; };

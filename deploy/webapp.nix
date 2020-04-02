@@ -16,9 +16,11 @@ rec {
         ln -sf "$srcdir"/{elm.json,src} "$workdir"
         ln -sf "$srcdir"/index.html "$webroot"/index.html
 
+        echo "Generating Elm bindings..."
         ${events}/bin/elmgen --target-directory "$workdir/src"
         ${generatePostgrestBindings}
 
+        echo "Building..."
         cd "$workdir"
 
         ${elmPackages.elm}/bin/elm make src/Main.elm \
@@ -39,14 +41,14 @@ rec {
         # shellcheck disable=SC1090
         source "$(${deployLocal.mkEnv} . "$tmpdir")"
 
-        ${db.setup}
-        ${db.startDaemon}
+        ${db.setup} > /dev/null
+        ${db.startDaemon} > /dev/null
 
         ${postgrestToElm}/bin/postgrest-to-elm \
           --db-uri "${settings.dbApiserverURI}" --role webuser --schema api \
           --target-directory "$targetdir"
 
-        ${db.stopDaemon}
+        ${db.stopDaemon} > /dev/null
       '';
 
   watch =
