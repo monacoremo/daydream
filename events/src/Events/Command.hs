@@ -55,8 +55,8 @@ aesonOptions :: Aeson.Options
 aesonOptions =
     Aeson.defaultOptions
         { Aeson.constructorTagModifier = Aeson.camelTo2 '_'
-        , Aeson.sumEncoding = Aeson.TaggedObject "command" "value"
-        , Aeson.tagSingleConstructors = True
+        --, Aeson.sumEncoding = Aeson.TaggedObject "command" "value"
+        --, Aeson.tagSingleConstructors = True
         }
 
 

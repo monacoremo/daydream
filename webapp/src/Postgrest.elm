@@ -4,7 +4,7 @@ module Postgrest exposing
     , attribute
     , Relationship, HasOne, hasOne, HasMany, hasMany, HasNullable, hasNullable
     , Request
-    , readAll, readOne, readMany, readPage
+    , readAll, readOne, readMany
     , Selection
     , field, succeed
     , map, map2, map3, map4, map5, map6, map7, map8
@@ -17,7 +17,8 @@ module Postgrest exposing
     , Direction(..), Nulls(..), order
     , createOne, createMany, updateOne, updateMany, deleteOne, deleteMany
     , Changeset, change, batch
-    , toHttpRequest
+    --, toHttpRequest
+    --, readPage
     )
 
 {-| Make PostgREST requests in Elm.
@@ -328,52 +329,52 @@ type Condition_
 
 
 {-
-   Abbreviation 	Meaning 	               Postgres Equivalent
+   Abbreviation     Meaning                      Postgres Equivalent
 
-   eq 	            equals 	                     =
-   gt 	            greater than                 >
-   gte 	            greater than or equal 	     >=
-   lt 	            less than 	                 <
-   lte 	            less than or equal 	         <=
-   neq 	            not equal 	                 <> or !=
+   eq                 equals                          =
+   gt                 greater than                 >
+   gte                 greater than or equal          >=
+   lt                 less than                      <
+   lte                 less than or equal              <=
+   neq                 not equal                      <> or !=
 
-   like 	        LIKE operator                LIKE
+   like             LIKE operator                LIKE
                     (use * in place of %)
 
-   ilike 	        ILIKE operator               ILIKE
+   ilike             ILIKE operator               ILIKE
                     (use * in place of %)
 
-   in 	            one of a list of values      IN
+   in                 one of a list of values      IN
                     e.g. ?a=in.1,2,3
 
-   is 	            checking for exact           IS
+   is                 checking for exact           IS
                     equality (null,true,false)
 
-   fts 	            full-text search using       @@
+   fts                 full-text search using       @@
                     to_tsquery
 
-   cs 	            contains                     @>
+   cs                 contains                     @>
                     e.g. ?tags=cs.{example, new}
 
-   cd 	            contained in                 <@
+   cd                 contained in                 <@
                     e.g. ?values=cd.{1,2,3}
 
-   ov 	            overlap                      &&
+   ov                 overlap                      &&
                     e.g. ?period=ov.[2017-01-01,2017-06-30]
 
-   sl 	            strictly left of,            <<
+   sl                 strictly left of,            <<
                     e.g. ?range=sl.(1,10)
 
-   sr 	            strictly right of 	         >>
+   sr                 strictly right of              >>
 
-   nxr 	            does not extend to the       &<
+   nxr                 does not extend to the       &<
                     right of
                     e.g. ?range=nxr.(1,10)
 
-   nxl 	            does not extend to the       &>
+   nxl                 does not extend to the       &>
                     left of
 
-   adj 	            is adjacent to,              -|-
+   adj                 is adjacent to,              -|-
                     e.g. ?range=adj.(1,10)
 
 -}
@@ -1307,64 +1308,66 @@ readAll s select =
         }
 
 
-{-| -}
-readPage :
-    Schema id attributes
-    ->
-        { select : Selection attributes a
-        , where_ : Condition attributes
-        , order : ( Order attributes, List (Order attributes) )
-        , page : Int
-        , size : Int
-        }
-    -> Request { count : Int, data : List a }
-readPage (Schema schemaName attributes) options =
-    let
-        ( firstOrder, restOrder ) =
-            options.order
 
-        (Selection getSelection) =
-            options.select
+{-
+   readPage :
+       Schema id attributes
+       ->
+           { select : Selection attributes a
+           , where_ : Condition attributes
+           , order : ( Order attributes, List (Order attributes) )
+           , page : Int
+           , size : Int
+           }
+       -> Request { count : Int, data : List a }
+   readPage (Schema schemaName attributes) options =
+       let
+           ( firstOrder, restOrder ) =
+               options.order
 
-        { attributeNames, embeds, decoder } =
-            getSelection attributes
+           (Selection getSelection) =
+               options.select
 
-        cardinality =
-            Many
-                { order = applyOrders attributes (firstOrder :: restOrder)
-                , where_ = applyCondition attributes options.where_
-                , limit = Just options.size
-                , offset = Just ((options.page - 1) * options.size)
-                }
+           { attributeNames, embeds, decoder } =
+               getSelection attributes
 
-        parameters =
-            Parameters
-                { schemaName = schemaName
-                , attributeNames = attributeNames
-                , cardinality = cardinality
-                }
-                embeds
+           cardinality =
+               Many
+                   { order = applyOrders attributes (firstOrder :: restOrder)
+                   , where_ = applyCondition attributes options.where_
+                   , limit = Just options.size
+                   , offset = Just ((options.page - 1) * options.size)
+                   }
 
-        handleResponse response =
-            let
-                countResult =
-                    Dict.get "Content-Range" response.headers
-                        |> Maybe.andThen (String.split "/" >> List.reverse >> List.head)
-                        |> Maybe.andThen String.toInt
-                        |> Result.fromMaybe "Invalid Content-Range Header"
+           parameters =
+               Parameters
+                   { schemaName = schemaName
+                   , attributeNames = attributeNames
+                   , cardinality = cardinality
+                   }
+                   embeds
 
-                jsonResult =
-                    Decode.decodeString (Decode.list decoder) response.body
-                        |> Result.mapError Decode.errorToString
-            in
-            Result.map2 (\data count -> { data = data, count = count })
-                jsonResult
-                countResult
-    in
-    Page
-        { parameters = parameters
-        , expect = Http.expectStringResponse handleResponse
-        }
+           handleResponse response =
+               let
+                   countResult =
+                       Dict.get "Content-Range" response.headers
+                           |> Maybe.andThen (String.split "/" >> List.reverse >> List.head)
+                           |> Maybe.andThen String.toInt
+                           |> Result.fromMaybe "Invalid Content-Range Header"
+
+                   jsonResult =
+                       Decode.decodeString (Decode.list decoder) response.body
+                           |> Result.mapError Decode.errorToString
+               in
+               Result.map2 (\data count -> { data = data, count = count })
+                   jsonResult
+                   countResult
+       in
+       Page
+           { parameters = parameters
+           , expect = Http.expectStringResponse handleResponse
+           }
+-}
 
 
 {-| -}
@@ -1519,76 +1522,78 @@ deleteMany (Schema name attributes) options =
         }
 
 
-{-| -}
-toHttpRequest : { timeout : Maybe Float, token : Maybe String, url : String } -> Request a -> Http.Request a
-toHttpRequest { url, timeout, token } request =
-    let
-        ( authHeaders, withCredentials ) =
-            case token of
-                Just str ->
-                    ( [ Http.header "Authorization" ("Bearer " ++ str) ], True )
 
-                Nothing ->
-                    ( [], False )
-    in
-    case request of
-        Read { parameters, decoder } ->
-            Http.request
-                { method = "GET"
-                , headers = parametersToHeaders parameters ++ authHeaders
-                , url = parametersToUrl url parameters
-                , body = Http.emptyBody
-                , expect = Http.expectJson decoder
-                , timeout = timeout
-                , withCredentials = withCredentials
-                }
+{-
+   toHttpRequest : { timeout : Maybe Float, token : Maybe String, url : String } -> Request a -> Cmd a
+   toHttpRequest { url, timeout, token } request =
+       let
+           ( authHeaders, withCredentials ) =
+               case token of
+                   Just str ->
+                       ( [ Http.header "Authorization" ("Bearer " ++ str) ], True )
 
-        Page { parameters, expect } ->
-            Http.request
-                { method = "GET"
-                , headers =
-                    parametersToHeaders parameters
-                        ++ authHeaders
-                        ++ [ Http.header "Prefer" "count=exact" ]
-                , url = parametersToUrl url parameters
-                , body = Http.emptyBody
-                , expect = expect
-                , timeout = timeout
-                , withCredentials = withCredentials
-                }
+                   Nothing ->
+                       ( [], False )
+       in
+       case request of
+           Read { parameters, decoder } ->
+               Http.request
+                   { method = "GET"
+                   , headers = parametersToHeaders parameters ++ authHeaders
+                   , url = parametersToUrl url parameters
+                   , body = Http.emptyBody
+                   , expect = Http.expectJson decoder
+                   , timeout = timeout
+                   , withCredentials = withCredentials
+                   }
 
-        Update { parameters, decoder, value } ->
-            Http.request
-                { method = "PATCH"
-                , headers = parametersToHeaders parameters ++ authHeaders
-                , url = parametersToUrl url parameters
-                , body = Http.jsonBody value
-                , expect = Http.expectJson decoder
-                , timeout = timeout
-                , withCredentials = withCredentials
-                }
+           Page { parameters, expect } ->
+               Http.request
+                   { method = "GET"
+                   , headers =
+                       parametersToHeaders parameters
+                           ++ authHeaders
+                           ++ [ Http.header "Prefer" "count=exact" ]
+                   , url = parametersToUrl url parameters
+                   , body = Http.emptyBody
+                   , expect = expect
+                   , timeout = timeout
+                   , withCredentials = withCredentials
+                   }
 
-        Create { parameters, decoder, value } ->
-            Http.request
-                { method = "POST"
-                , headers = parametersToHeaders parameters ++ authHeaders
-                , url = parametersToUrl url parameters
-                , body = Http.jsonBody value
-                , expect = Http.expectJson decoder
-                , timeout = timeout
-                , withCredentials = withCredentials
-                }
+           Update { parameters, decoder, value } ->
+               Http.request
+                   { method = "PATCH"
+                   , headers = parametersToHeaders parameters ++ authHeaders
+                   , url = parametersToUrl url parameters
+                   , body = Http.jsonBody value
+                   , expect = Http.expectJson decoder
+                   , timeout = timeout
+                   , withCredentials = withCredentials
+                   }
 
-        Delete { parameters, decoder } ->
-            Http.request
-                { method = "DELETE"
-                , headers = parametersToHeaders parameters ++ authHeaders
-                , url = parametersToUrl url parameters
-                , body = Http.emptyBody
-                , expect = Http.expectJson decoder
-                , timeout = timeout
-                , withCredentials = withCredentials
-                }
+           Create { parameters, decoder, value } ->
+               Http.request
+                   { method = "POST"
+                   , headers = parametersToHeaders parameters ++ authHeaders
+                   , url = parametersToUrl url parameters
+                   , body = Http.jsonBody value
+                   , expect = Http.expectJson decoder
+                   , timeout = timeout
+                   , withCredentials = withCredentials
+                   }
+
+           Delete { parameters, decoder } ->
+               Http.request
+                   { method = "DELETE"
+                   , headers = parametersToHeaders parameters ++ authHeaders
+                   , url = parametersToUrl url parameters
+                   , body = Http.emptyBody
+                   , expect = Http.expectJson decoder
+                   , timeout = timeout
+                   , withCredentials = withCredentials
+                   }
+-}
 
 
 parametersToHeaders : Parameters -> List Http.Header
