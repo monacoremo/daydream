@@ -20,7 +20,7 @@ rec {
           ps.selenium
           ps.click
         ]
-        );
+      );
 
   logmux =
     deploy/utils/logmux.py;
