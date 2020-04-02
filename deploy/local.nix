@@ -1,12 +1,18 @@
-{ stdenv, checkedShellScript, runtimeShell, shellcheck, pwgen, ncurses,
-  utillinux, writeText, envsubst, unixtools, python, settings, db, api, ingress,
-  webapp }:
-
+{ stdenv
+, shellcheck
+, python
+, pwgen
+, runtimeShell
+, checkedShellScript
+, settings
+, api
+, db
+, ingress
+, webapp
+, logmux
+}:
 
 let
-  logmux =
-    ./logmux.py;
-
   binPrefix =
     "${settings.binPrefix}local-";
 in

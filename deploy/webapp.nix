@@ -1,8 +1,16 @@
-{ settings, elmPackages, entr, events, db, deployLocal, checkedShellScript,
-  postgrestToElm }:
+{ settings
+, elmPackages
+, entr
+, events
+, db
+, deployLocal
+, checkedShellScript
+, postgrestToElm
+}:
 
 let
-  binPrefix = "${settings.binPrefix}webapp-";
+  binPrefix =
+    "${settings.binPrefix}webapp-";
 in
 rec {
   build =

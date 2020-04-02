@@ -1,4 +1,10 @@
-{ settings, writeText, checkedShellScript, postgresql, entr }:
+{ settings
+, writeText
+, checkedShellScript
+, postgresql
+, entr
+, md2sql
+}:
 
 let
   postgresConf =
@@ -16,9 +22,6 @@ let
         #log_statement = 'none'
         log_timezone = 'UTC'
       '';
-
-  md2sql =
-    ./md2sql.sed;
 
   env =
     ''

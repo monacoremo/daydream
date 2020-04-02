@@ -20,7 +20,13 @@ rec {
           ps.selenium
           ps.click
         ]
-      );
+        );
+
+  logmux =
+    deploy/utils/logmux.py;
+
+  md2sql =
+    deploy/utils/md2sql.sed;
 
   geckodriver =
     pkgs.geckodriver;
@@ -51,14 +57,14 @@ rec {
 
   db =
     pkgs.callPackage deploy/db.nix
-      { inherit settings checkedShellScript postgresql; };
+      { inherit settings checkedShellScript postgresql md2sql; };
 
   checkedShellScript =
     pkgs.callPackage deploy/checked-shell-script.nix {};
 
   deployLocal =
     pkgs.callPackage deploy/local.nix
-      { inherit settings checkedShellScript python db api ingress webapp; };
+      { inherit settings checkedShellScript python db api ingress webapp logmux; };
 
   tests =
     pkgs.callPackage deploy/tests.nix
