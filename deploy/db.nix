@@ -21,8 +21,8 @@ let
     ./md2sql.sed;
 in
 rec {
-  run =
-    checkedShellScript.writeBin "fullstack-db-run"
+  setup =
+    checkedShellScript.writeBin "fullstack-db-setup"
       ''
         set -euo pipefail
 
@@ -68,12 +68,54 @@ rec {
 
         ${postgresql}/bin/pg_ctl stop
 
+        trap - exit
+
         rm -rf "$FULLSTACK_DB_SETUPHOST"
 
         cat ${postgresConf} >> "$FULLSTACK_DB_DIR"/postgresql.conf
+      '';
+
+  run =
+    checkedShellScript.writeBin "fullstack-db-run"
+      ''
+        set -euo pipefail
+
+        export PGDATA="$FULLSTACK_DB_DIR"
+        export PGHOST="$FULLSTACK_DB_HOST"
+        export PGUSER="$FULLSTACK_DB_SUPERUSER"
+        export PGDATABASE="$FULLSTACK_DB_DBNAME"
+
+        ${setup}/bin/fullstack-db-setup
 
         exec ${postgresql}/bin/postgres -F -c listen_addresses="" \
           -k "$FULLSTACK_DB_HOST"
+      '';
+
+  startDaemon =
+    checkedShellScript.writeBin "fullstack-db-daemon-start"
+      ''
+        set -euo pipefail
+
+        export PGDATA="$FULLSTACK_DB_DIR"
+        export PGHOST="$FULLSTACK_DB_HOST"
+        export PGUSER="$FULLSTACK_DB_SUPERUSER"
+        export PGDATABASE="$FULLSTACK_DB_DBNAME"
+
+        ${postgresql}/bin/pg_ctl start \
+          -o "-F -c listen_addresses=\"\" -k $FULLSTACK_DB_HOST"
+      '';
+
+  stopDaemon =
+    checkedShellScript.writeBin "fullstack-db-daemon-stop"
+      ''
+        set -euo pipefail
+
+        export PGDATA="$FULLSTACK_DB_DIR"
+        export PGHOST="$FULLSTACK_DB_HOST"
+        export PGUSER="$FULLSTACK_DB_SUPERUSER"
+        export PGDATABASE="$FULLSTACK_DB_DBNAME"
+
+        ${postgresql}/bin/pg_ctl stop
       '';
 
   watch =

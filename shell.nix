@@ -20,6 +20,9 @@ pkgs.stdenv.mkDerivation {
     fullstack.api.watch
     fullstack.db.run
     fullstack.db.watch
+    fullstack.db.setup
+    fullstack.db.startDaemon
+    fullstack.db.stopDaemon
     fullstack.deployLocal.mkEnv
     fullstack.deployLocal.run
     fullstack.deployLocal.watch
