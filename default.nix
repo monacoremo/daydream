@@ -28,6 +28,9 @@ rec {
   md2sql =
     deploy/utils/md2sql.sed;
 
+  nixpkgsUpdate =
+    pkgs.callPackage deploy/nixpkgs-update.nix { inherit checkedShellScript; };
+
   geckodriver =
     pkgs.geckodriver;
 
