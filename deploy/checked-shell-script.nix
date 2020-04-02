@@ -1,35 +1,6 @@
 { writeTextFile, runtimeShell, stdenv, shellcheck}:
 
-rec { /*
-   * Writes a shell script and checks it with shellcheck.
-   *
-   */
-  write =
-    name: text:
-      writeTextFile {
-        inherit name;
-        executable = true;
-        text =
-          ''
-            #!${runtimeShell}
-            set -euo pipefail
-
-            ${text}
-          '';
-        checkPhase =
-          ''
-            # check syntax
-            ${stdenv.shell} -n $out
-
-            # check for shellcheck recommendations
-            ${shellcheck}/bin/shellcheck $out
-          '';
-      };
-
-  /*
-   * Writes a shell script to bin/<name> and checks it with shellcheck.
-   *
-   */
+let
   writeBin =
     name: text:
       writeTextFile {
@@ -52,11 +23,17 @@ rec { /*
             ${shellcheck}/bin/shellcheck $out/bin/${name}
           '';
       };
+in
+  name: text:
+    stdenv.mkDerivation rec {
+      inherit name;
 
-  script =
-    name: text:
-      rec {
-        script = writeBin name text;
-        bin = "${script}/bin/${name}";
-      };
-}
+      bin = writeBin name text;
+
+      phases = [ "installPhase" ];
+
+      installPhase =
+        ''
+          cp ${bin}/bin/${name} $out
+        '';
+    }

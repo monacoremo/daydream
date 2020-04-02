@@ -16,26 +16,26 @@ pkgs.stdenv.mkDerivation {
   name = "fullstack";
 
   buildInputs = [
-    fullstack.api.run
-    fullstack.api.watch
-    fullstack.db.run
-    fullstack.db.watch
-    fullstack.db.setup
-    fullstack.db.startDaemon
-    fullstack.db.stopDaemon
-    fullstack.deployLocal.mkEnv
-    fullstack.deployLocal.run
-    fullstack.deployLocal.watch
-    fullstack.ingress.run
+    fullstack.api.run.bin
+    fullstack.api.watch.bin
+    fullstack.db.run.bin
+    fullstack.db.watch.bin
+    fullstack.db.setup.bin
+    fullstack.db.startDaemon.bin
+    fullstack.db.stopDaemon.bin
+    fullstack.deployLocal.mkEnv.bin
+    fullstack.deployLocal.run.bin
+    fullstack.deployLocal.watch.bin
+    fullstack.ingress.run.bin
+    fullstack.webapp.build.bin
+    fullstack.webapp.watch.bin
+    fullstack.webapp.generatePostgrestBindings.bin
+    fullstack.tests.run.bin
+    fullstack.tests.watch.bin
+    fullstack.geckodriver
     fullstack.postgresql
     fullstack.postgrest
     fullstack.python
-    fullstack.webapp.build
-    fullstack.webapp.watch
-    fullstack.webapp.generatePostgrestBindings.script
-    fullstack.tests.run
-    fullstack.tests.watch
-    fullstack.geckodriver
     pkgs.bash
     pkgs.firefox
     pkgs.curl
@@ -50,7 +50,5 @@ pkgs.stdenv.mkDerivation {
     source "$(fullstack-local-mkenv . "$tmpdir")"
     trap "rm -rf $tmpdir" exit
     echo "Environment set up in $tmpdir"
-
-    echo "${fullstack.settings.dbURI}"
   '';
 }

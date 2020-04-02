@@ -1,19 +1,23 @@
-{ elmPackages, entr, events, db, deployLocal, checkedShellScript, postgrestToElm }:
+{ settings, elmPackages, entr, events, db, deployLocal, checkedShellScript,
+  postgrestToElm }:
 
+let
+  binPrefix = "${settings.binPrefix}webapp-";
+in
 rec {
   build =
-    checkedShellScript.writeBin "fullstack-webapp-build"
+    checkedShellScript "${binPrefix}build"
       ''
-        srcdir="$FULLSTACK_WEBAPP_SRC"
-        workdir="$FULLSTACK_WEBAPP_DIR"
-        webroot="$FULLSTACK_WEBAPP_WEBROOT"
+        srcdir="${settings.webappSrc}"
+        workdir="${settings.webappDir}"
+        webroot="${settings.webappWebroot}"
 
         mkdir -p "$workdir" "$webroot"
         ln -sf "$srcdir"/{elm.json,src} "$workdir"
         ln -sf "$srcdir"/index.html "$webroot"/index.html
 
         ${events}/bin/elmgen --target-directory "$workdir/src"
-        ${generatePostgrestBindings.bin}
+        ${generatePostgrestBindings}
 
         cd "$workdir"
 
@@ -25,30 +29,29 @@ rec {
       '';
 
   generatePostgrestBindings =
-    checkedShellScript.script "fullstack-webapp-postgrest-gen"
+    checkedShellScript "${binPrefix}postgrest-gen"
       ''
-        targetdir="$FULLSTACK_WEBAPP_DIR"/src
+        targetdir="${settings.webappDir}"/src
 
         tmpdir="$(mktemp -d)"
         trap 'rm -rf $tmpdir' exit
 
         # shellcheck disable=SC1090
-        source "$(${deployLocal.mkEnv}/bin/fullstack-local-mkenv . "$tmpdir")"
+        source "$(${deployLocal.mkEnv} . "$tmpdir")"
 
-        ${db.setup}/bin/fullstack-db-setup
-        ${db.startDaemon}/bin/fullstack-db-daemon-start
+        ${db.setup}
+        ${db.startDaemon}
 
         ${postgrestToElm}/bin/postgrest-to-elm \
-          --db-uri "$FULLSTACK_DB_APISERVER_URI" --role webuser --schema api \
+          --db-uri "${settings.dbApiserverURI}" --role webuser --schema api \
           --target-directory "$targetdir"
 
-        ${db.stopDaemon}/bin/fullstack-db-daemon-stop
+        ${db.stopDaemon}
       '';
 
   watch =
-    checkedShellScript.writeBin "fullstack-webapp-watch"
+    checkedShellScript "${binPrefix}watch"
       ''
-        find "$FULLSTACK_WEBAPP_SRC" | \
-          ${entr}/bin/entr -d ${build}/bin/fullstack-webapp-build
+        find "${settings.webappSrc}" | ${entr}/bin/entr -d ${build}
       '';
 }

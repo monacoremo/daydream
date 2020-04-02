@@ -23,10 +23,10 @@ rec {
   geckodriver =
     pkgs.geckodriver;
 
-  appName = "Fullstack";
+  appName = "fullstack";
 
   settings =
-    (pkgs.callPackage deploy/settings.nix {}) { inherit appName; };
+    pkgs.callPackage deploy/settings.nix { inherit appName; };
 
   events =
     (import events/default.nix).events;
@@ -39,24 +39,28 @@ rec {
 
   webapp =
     pkgs.callPackage deploy/webapp.nix
-      { inherit events db deployLocal checkedShellScript postgrestToElm; };
+      { inherit settings events db deployLocal checkedShellScript postgrestToElm; };
 
   ingress =
-    pkgs.callPackage deploy/ingress.nix { inherit checkedShellScript; };
+    pkgs.callPackage deploy/ingress.nix
+      { inherit settings checkedShellScript; };
 
   api =
-    pkgs.callPackage deploy/api.nix { inherit checkedShellScript postgrest; };
+    pkgs.callPackage deploy/api.nix
+      { inherit settings checkedShellScript postgrest; };
 
   db =
-    pkgs.callPackage deploy/db.nix { inherit checkedShellScript postgresql; };
+    pkgs.callPackage deploy/db.nix
+      { inherit settings checkedShellScript postgresql; };
 
   checkedShellScript =
     pkgs.callPackage deploy/checked-shell-script.nix {};
 
   deployLocal =
-    pkgs.callPackage deploy/local.nix { inherit checkedShellScript python; }
-      { inherit settings db api ingress webapp; };
+    pkgs.callPackage deploy/local.nix
+      { inherit settings checkedShellScript python db api ingress webapp; };
 
   tests =
-    pkgs.callPackage deploy/tests.nix { inherit checkedShellScript python deployLocal; };
+    pkgs.callPackage deploy/tests.nix
+      { inherit settings checkedShellScript python deployLocal; };
 }

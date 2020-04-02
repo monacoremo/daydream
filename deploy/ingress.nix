@@ -1,4 +1,5 @@
-{ stdenv
+{ settings
+, stdenv
 , imagemagick
 , material-design-icons
 , gixy
@@ -37,7 +38,7 @@ let
                 add_header X-Frame-Options "SAMEORIGIN";
                 add_header X-XSS-Protection "1; mode=block";
 
-                root $FULLSTACK_WEBAPP_WEBROOT;
+                root ${settings.webappWebroot};
 
                 location = /favicon.ico {
                     alias ${favicon};
@@ -46,11 +47,11 @@ let
                 location /api/ {
                     more_clear_input_headers Accept-Encoding;
                     access_by_lua_file ${antiCsrf};
-                    proxy_pass $FULLSTACK_API_URI;
+                    proxy_pass ${settings.apiURI};
                 }
 
                 location /app/ {
-                    alias $FULLSTACK_WEBAPP_DIR/;
+                    alias ${settings.webappDir}/;
                     try_files $$uri /;
                 }
 
@@ -145,16 +146,19 @@ let
           ''
             ${luajit}/bin/luajit -bl $out > /dev/null
           '';
-      };
+        };
+
+  binPrefix =
+    "${settings.binPrefix}ingress-";
 in
 { run =
-    checkedShellScript.writeBin "fullstack-ingress-run"
+    checkedShellScript "${binPrefix}run"
       ''
-        mkdir -p "$FULLSTACK_INGRESS_DIR"/{logs,conf}
-        touch "$FULLSTACK_INGRESS_DIR"/logs/{error.log,access.log}
+        mkdir -p "${settings.ingressDir}"/{logs,conf}
+        touch "${settings.ingressDir}"/logs/{error.log,access.log}
         ${envsubst}/bin/envsubst -i ${nginxConf} \
-          -o "$FULLSTACK_INGRESS_DIR/conf/nginx.conf"
+          -o "${settings.ingressDir}/conf/nginx.conf"
 
-        exec ${openresty}/bin/openresty -p "$FULLSTACK_INGRESS_DIR"
+        exec ${openresty}/bin/openresty -p "${settings.ingressDir}"
       '';
 }

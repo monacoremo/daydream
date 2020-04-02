@@ -1,30 +1,32 @@
-{ writeText, checkedShellScript, postgrest, entr }:
+{ settings, writeText, checkedShellScript, postgrest, entr }:
 
 let
   postgrestConf =
     writeText "postgrest.conf"
       ''
-        db-uri = "$(FULLSTACK_DB_APISERVER_URI)"
+        db-uri = "$(${settings.vars.dbApiserverURI})"
         db-schema = "api"
         db-anon-role = "anonymous"
 
         pre-request = "auth.authenticate"
 
-        server-unix-socket = "$(FULLSTACK_API_SOCKET)"
+        server-unix-socket = "$(${settings.vars.apiSocket})"
       '';
+
+  binPrefix =
+    "${settings.binPrefix}api-";
 in
 rec {
   run =
-    checkedShellScript.writeBin "fullstack-api-run"
+    checkedShellScript "${binPrefix}run"
       ''
-        mkdir -p "$FULLSTACK_API_DIR"
+        mkdir -p "${settings.apiDir}"
         exec ${postgrest}/bin/postgrest ${postgrestConf}
       '';
 
   watch =
-    checkedShellScript.writeBin "fullstack-api-watch"
+    checkedShellScript "${binPrefix}watch"
       ''
-        find "$FULLSTACK_DB_SRC" | \
-          ${entr}/bin/entr -d -r ${run}/bin/fullstack-api-run
+        find "${settings.dbSrc}" | ${entr}/bin/entr -d -r ${run}
       '';
 }

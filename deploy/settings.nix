@@ -1,5 +1,4 @@
-{ lib }:
-{ appName }:
+{ lib, appName }:
 
 let
   prefix = "${lib.toUpper appName}_";
@@ -40,5 +39,9 @@ let
   };
 
   vals = lib.mapAttrs (name: value: "$" + value) vars;
+
+  fixed = {
+    binPrefix = "${appName}-";
+  };
 in
-  vals // { inherit vars; }
+  fixed // vals // { inherit vars; }

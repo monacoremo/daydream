@@ -1,72 +1,75 @@
 { stdenv, checkedShellScript, runtimeShell, shellcheck, pwgen, ncurses,
-utillinux, writeText, envsubst, unixtools, python }:
-{ settings, db, api, ingress, webapp }:
+  utillinux, writeText, envsubst, unixtools, python, settings, db, api, ingress,
+  webapp }:
 
 
 let
   logmux =
     ./logmux.py;
+
+  binPrefix =
+    "${settings.binPrefix}local-";
 in
 rec {
   run =
-    checkedShellScript.writeBin "fullstack-local-run"
+    checkedShellScript "${binPrefix}run"
       ''
         set -e
         trap "kill 0" exit
 
-        ${resetLogs}/bin/fullstack-local-resetlogs
-        ${tailLogs}/bin/fullstack-local-taillogs 1>&2 &
+        ${resetLogs}
+        ${tailLogs} 1>&2 &
 
-        ${webapp.build}/bin/fullstack-webapp-build 2&>> "$FULLSTACK_WEBAPP_LOGFILE"
+        ${webapp.build} 2&>> "${settings.webappLogfile}"
 
-        ${db.run}/bin/fullstack-db-run 2&>> "$FULLSTACK_DB_LOGFILE" &
-        ${api.run}/bin/fullstack-api-run 2&>> "$FULLSTACK_API_LOGFILE" &
-        ${ingress.run}/bin/fullstack-ingress-run 2&>> "$FULLSTACK_INGRESS_LOGFILE" &
+        ${db.run} 2&>> "${settings.dbLogfile}" &
+        ${api.run} 2&>> "${settings.apiLogfile}" &
+        ${ingress.run} 2&>> "${settings.ingressLogfile}" &
 
         wait
       '';
 
   watch =
-    checkedShellScript.writeBin "fullstack-local-watch"
+    checkedShellScript "${binPrefix}watch"
       ''
         set -e
         trap "kill 0" exit
 
-        ${resetLogs}/bin/fullstack-local-resetlogs
-        ${tailLogs}/bin/fullstack-local-taillogs 1>&2 &
+        ${resetLogs}
+        ${tailLogs} 1>&2 &
 
-        ${db.watch}/bin/fullstack-db-watch 2&>> "$FULLSTACK_DB_LOGFILE" &
-        ${api.watch}/bin/fullstack-api-watch 2&>> "$FULLSTACK_API_LOGFILE" &
-        ${ingress.run}/bin/fullstack-ingress-run 2&>> "$FULLSTACK_INGRESS_LOGFILE" &
-        ${webapp.watch}/bin/fullstack-webapp-watch 2&>> "$FULLSTACK_WEBAPP_LOGFILE" &
+        ${db.watch} 2&>> "${settings.dbLogfile}" &
+        ${api.watch} 2&>> "${settings.apiLogfile}" &
+        ${ingress.run} 2&>> "${settings.ingressLogfile}" &
+        ${webapp.watch} 2&>> "${settings.webappLogfile}" &
 
         wait
       '';
 
   tailLogs =
-    checkedShellScript.writeBin "fullstack-local-taillogs"
+    checkedShellScript "${binPrefix}taillogs"
       ''
         ${python}/bin/python ${logmux} \
-            "$FULLSTACK_DB_LOGFILE?label=db&color=red" \
-            "$FULLSTACK_API_LOGFILE?label=api&color=blue" \
-            "$FULLSTACK_INGRESS_LOGFILE?label=ingress&color=green" \
-            "$FULLSTACK_INGRESS_DIR/logs/access.log?label=ingress-access&color=bright_green" \
-            "$FULLSTACK_WEBAPP_LOGFILE?label=webapp&color=cyan"
+            "${settings.dbLogfile}?label=db&color=red" \
+            "${settings.apiLogfile}?label=api&color=blue" \
+            "${settings.ingressLogfile}?label=ingress&color=green" \
+            "${settings.ingressDir}/logs/access.log?label=ingress-access&color=bright_green" \
+            "${settings.webappLogfile}?label=webapp&color=cyan"
       '';
 
   resetLogs =
-    checkedShellScript.writeBin "fullstack-local-resetlogs"
+    checkedShellScript "${binPrefix}resetlogs"
       ''
-        mkdir -p "$FULLSTACK_INGRESS_DIR/logs"
-        true > "$FULLSTACK_INGRESS_DIR/logs/access.log"
-        true > "$FULLSTACK_DB_LOGFILE"
-        true > "$FULLSTACK_API_LOGFILE"
-        true > "$FULLSTACK_INGRESS_LOGFILE"
-        true > "$FULLSTACK_WEBAPP_LOGFILE"
+        mkdir -p "${settings.ingressDir}/logs"
+        true > "${settings.ingressDir}/logs/access.log"
+        true > "${settings.dbLogfile}"
+        true > "${settings.apiLogfile}"
+        true > "${settings.ingressLogfile}"
+        true > "${settings.webappLogfile}"
       '';
 
   mkEnv =
-    checkedShellScript.writeBin "fullstack-local-mkenv"
+    checkedShellScript "${binPrefix}mkenv"
       ''
         sourcedir=$(realpath "$1")
         basedir=$(realpath "$2")

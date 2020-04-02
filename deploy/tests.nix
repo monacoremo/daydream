@@ -1,4 +1,4 @@
-{ python, checkedShellScript, deployLocal, curl, entr }:
+{ settings, python, checkedShellScript, deployLocal, curl, entr }:
 
 let
   testPython =
@@ -9,10 +9,13 @@ let
           ps.requests
         ]
       );
+
+  binPrefix =
+    "${settings.binPrefix}tests-";
 in
 rec {
   run =
-    checkedShellScript.writeBin "fullstack-tests-run"
+    checkedShellScript "${binPrefix}run"
       ''
         set -e
 
@@ -28,11 +31,11 @@ rec {
 
         trap cleanup exit
 
-        ${deployLocal.run}/bin/fullstack-local-run &
+        ${deployLocal.run} &
 
         printf "Waiting for app to become ready."
 
-        checkurl="$FULLSTACK_URI"/healthcheck
+        checkurl="${settings.URI}"/healthcheck
 
         status() {
             ${curl}/bin/curl -s -o /dev/null -w '%{http_code}' "$checkurl"
@@ -50,9 +53,8 @@ rec {
       '';
 
   watch =
-    checkedShellScript.writeBin "fullstack-tests-watch"
+    checkedShellScript "${binPrefix}watch"
       ''
-        find "$FULLSTACK_SRC/.." | \
-            ${entr}/bin/entr -r ${run}/bin/fullstack-tests-run
+        find "${settings.sourceDir}/.." | ${entr}/bin/entr -r ${run}
       '';
 }

@@ -1,4 +1,4 @@
-{ writeText, checkedShellScript, postgresql, entr }:
+{ settings, writeText, checkedShellScript, postgresql, entr }:
 
 let
   postgresConf =
@@ -22,15 +22,18 @@ let
 
   env =
     ''
-      export PGDATA="$FULLSTACK_DB_DIR"
-      export PGHOST="$FULLSTACK_DB_HOST"
-      export PGUSER="$FULLSTACK_DB_SUPERUSER"
-      export PGDATABASE="$FULLSTACK_DB_DBNAME"
+      export PGDATA="${settings.dbDir}"
+      export PGHOST="${settings.dbHost}"
+      export PGUSER="${settings.dbSuperuser}"
+      export PGDATABASE="${settings.dbName}"
     '';
+
+  binPrefix =
+    "${settings.binPrefix}db-";
 in
 rec {
   setup =
-    checkedShellScript.writeBin "fullstack-db-setup"
+    checkedShellScript "${binPrefix}setup"
       ''
         ${env}
 
@@ -41,65 +44,64 @@ rec {
 
         trap cleanup exit
 
-        rm -rf "$FULLSTACK_DB_DIR"
-        mkdir -p "$FULLSTACK_DB_DIR"
+        rm -rf "${settings.dbDir}"
+        mkdir -p "${settings.dbDir}"
 
         # Initialize the PostgreSQL cluster
         pwfile=$(mktemp)
-        echo "$FULLSTACK_DB_SUPERUSER_PW" > "$pwfile"
+        echo "${settings.dbSuperuserPassword}" > "$pwfile"
 
         TZ=UTC ${postgresql}/bin/initdb --no-locale --encoding=UTF8 --nosync \
           -U "$PGUSER" -A password --pwfile="$pwfile"
 
         rm "$pwfile"
 
-        mkdir -p "$FULLSTACK_DB_SETUPHOST"
+        mkdir -p "${settings.dbSetupHost}"
 
         ${postgresql}/bin/pg_ctl start \
-          -o "-F -c listen_addresses=\"\" -k $FULLSTACK_DB_SETUPHOST"
+          -o "-F -c listen_addresses=\"\" -k ${settings.dbSetupHost}"
 
-        for f in "$FULLSTACK_DB_SRC"/*.sql.md; do
+        for f in "${settings.dbSrc}"/*.sql.md; do
           filename=$(basename -- "$f")
-          targetpath="$FULLSTACK_DB_DIR/$filename.sql"
+          targetpath="${settings.dbDir}/$filename.sql"
           sed -f ${md2sql} <"$f" >"$targetpath"
-          ${postgresql}/bin/psql "$FULLSTACK_DB_SUPERUSER_SETUP_URI" -f "$targetpath"
+          ${postgresql}/bin/psql "${settings.dbSetupURI}" -f "$targetpath"
         done
 
-        ${postgresql}/bin/psql "$FULLSTACK_DB_SUPERUSER_SETUP_URI" << EOF
-          alter role authenticator with password '$FULLSTACK_DB_APISERVER_PW';
+        ${postgresql}/bin/psql "${settings.dbSetupURI}" << EOF
+          alter role authenticator with password '${settings.dbApiserverPassword}';
         EOF
 
         ${postgresql}/bin/pg_ctl stop
 
         trap - exit
 
-        rm -rf "$FULLSTACK_DB_SETUPHOST"
+        rm -rf "${settings.dbSetupHost}"
 
-        cat ${postgresConf} >> "$FULLSTACK_DB_DIR"/postgresql.conf
+        cat ${postgresConf} >> "${settings.dbDir}"/postgresql.conf
       '';
 
   run =
-    checkedShellScript.writeBin "fullstack-db-run"
+    checkedShellScript "${binPrefix}run"
       ''
         ${env}
-
-        ${setup}/bin/fullstack-db-setup
+        ${setup}
 
         exec ${postgresql}/bin/postgres -F -c listen_addresses="" \
-          -k "$FULLSTACK_DB_HOST"
+          -k "${settings.dbHost}"
       '';
 
   startDaemon =
-    checkedShellScript.writeBin "fullstack-db-daemon-start"
+    checkedShellScript "${binPrefix}daemon-start"
       ''
         ${env}
 
         ${postgresql}/bin/pg_ctl start \
-          -o "-F -c listen_addresses=\"\" -k $FULLSTACK_DB_HOST"
+          -o "-F -c listen_addresses=\"\" -k ${settings.dbHost}"
       '';
 
   stopDaemon =
-    checkedShellScript.writeBin "fullstack-db-daemon-stop"
+    checkedShellScript "${binPrefix}daemon-stop"
       ''
         ${env}
 
@@ -107,9 +109,8 @@ rec {
       '';
 
   watch =
-    checkedShellScript.writeBin "fullstack-db-watch"
+    checkedShellScript "${binPrefix}watch"
       ''
-        find "$FULLSTACK_DB_SRC" | \
-          ${entr}/bin/entr -d -r ${run}/bin/fullstack-db-run
+        find "${settings.dbSrc}" | ${entr}/bin/entr -d -r ${run}
       '';
 }
