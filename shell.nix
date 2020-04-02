@@ -37,6 +37,8 @@ pkgs.stdenv.mkDerivation {
     project.webapp.generatePostgrestBindings.bin
     project.tests.run.bin
     project.tests.watch.bin
+    project.docs.build.bin
+    project.docs.watch.bin
     project.nixpkgsUpdate.bin
     project.geckodriver
     project.postgresql

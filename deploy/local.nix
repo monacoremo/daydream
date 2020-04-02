@@ -9,6 +9,7 @@
 , db
 , ingress
 , webapp
+, docs
 , logmux
 }:
 
@@ -27,6 +28,7 @@ rec {
         ${tailLogs} 1>&2 &
 
         ${webapp.build} 2&>> "${settings.webappLogfile}"
+        ${docs.build} 2&>> "${settings.docsLogfile}"
 
         ${db.run} 2&>> "${settings.dbLogfile}" &
         ${api.run} 2&>> "${settings.apiLogfile}" &
@@ -48,6 +50,7 @@ rec {
         ${api.watch} 2&>> "${settings.apiLogfile}" &
         ${ingress.run} 2&>> "${settings.ingressLogfile}" &
         ${webapp.watch} 2&>> "${settings.webappLogfile}" &
+        ${docs.watch} 2&>> "${settings.docsLogfile}" &
 
         wait
       '';
@@ -60,7 +63,8 @@ rec {
             "${settings.apiLogfile}?label=api&color=blue" \
             "${settings.ingressLogfile}?label=ingress&color=green" \
             "${settings.ingressDir}/logs/access.log?label=ingress-access&color=bright_green" \
-            "${settings.webappLogfile}?label=webapp&color=cyan"
+            "${settings.webappLogfile}?label=webapp&color=cyan" \
+            "${settings.docsLogfile}?label=docs&color=blue"
       '';
 
   resetLogs =
@@ -72,6 +76,7 @@ rec {
         true > "${settings.apiLogfile}"
         true > "${settings.ingressLogfile}"
         true > "${settings.webappLogfile}"
+        true > "${settings.docsLogfile}"
       '';
 
   mkEnv =
@@ -117,6 +122,10 @@ rec {
 
         export ${settings.vars.ingressLogfile}="\${settings.dir}/ingress.log"
         export ${settings.vars.ingressDir}="\${settings.dir}/ingress"
+
+        export ${settings.vars.docsLogfile}="\${settings.dir}/docs.log"
+        export ${settings.vars.docsSrc}="\${settings.sourceDir}/docs"
+        export ${settings.vars.docsDir}="\${settings.dir}/docs"
 
         # psql variables for convenience
         export PGHOST="\${settings.dbHost}"

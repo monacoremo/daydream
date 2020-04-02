@@ -8,6 +8,7 @@ let
   apiPrefix = "${prefix}API_";
   webappPrefix = "${prefix}WEBAPP_";
   ingressPrefix = "${prefix}INGRESS_";
+  docsPrefix = "${prefix}DOCS_";
 
   vars = {
     sourceDir = "${prefix}SRC";
@@ -38,6 +39,9 @@ let
     webappWebroot = "${webappPrefix}WEBROOT";
     ingressLogfile = "${ingressPrefix}LOGFILE";
     ingressDir = "${ingressPrefix}DIR";
+    docsSrc = "${docsPrefix}SRC";
+    docsDir = "${docsPrefix}DIR";
+    docsLogfile = "${docsPrefix}LOGFILE";
   };
 
   vals = lib.mapAttrs (name: value: "$" + value) vars;

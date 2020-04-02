@@ -55,6 +55,10 @@ let
                     try_files $$uri /;
                 }
 
+                location /docs/ {
+                    alias ${settings.docsDir}/;
+                }
+
                 location /fonts/material-design-icons/ {
                     alias ${material-design-icons}/share/fonts/;
                 }

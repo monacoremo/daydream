@@ -50,6 +50,10 @@ rec {
     pkgs.callPackage deploy/webapp.nix
       { inherit settings events db deployLocal checkedShellScript postgrestToElm; };
 
+  docs =
+    pkgs.callPackage deploy/docs.nix
+      { inherit settings checkedShellScript; };
+
   ingress =
     pkgs.callPackage deploy/ingress.nix
       { inherit settings checkedShellScript; };
@@ -67,7 +71,7 @@ rec {
 
   deployLocal =
     pkgs.callPackage deploy/local.nix
-      { inherit settings checkedShellScript python db api ingress webapp logmux; };
+      { inherit settings checkedShellScript python db api ingress webapp docs logmux; };
 
   tests =
     pkgs.callPackage deploy/tests.nix
