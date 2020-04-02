@@ -28,6 +28,7 @@ pkgs.mkShell {
     project.db.setup.bin
     project.db.startDaemon.bin
     project.db.stopDaemon.bin
+    project.db.test.bin
     project.deployLocal.mkEnv.bin
     project.deployLocal.run.bin
     project.deployLocal.watch.bin

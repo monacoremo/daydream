@@ -68,7 +68,7 @@ rec {
           filename=$(basename -- "$f")
           targetpath="${settings.dbDir}/$filename.sql"
           sed -f ${md2sql} <"$f" >"$targetpath"
-          ${postgresql}/bin/psql "${settings.dbSetupURI}" -f "$targetpath"
+          ${postgresql}/bin/psql "${settings.dbSetupURI}" -X -1 -f "$targetpath"
         done
 
         ${postgresql}/bin/psql "${settings.dbSetupURI}" << EOF
@@ -115,5 +115,22 @@ rec {
     checkedShellScript "${binPrefix}watch"
       ''
         find "${settings.dbSrc}" | ${entr}/bin/entr -d -r ${run}
+      '';
+
+  test =
+    checkedShellScript "${binPrefix}test"
+      ''
+        ${setup} > /dev/null
+        ${startDaemon} > /dev/null
+
+        ${postgresql}/bin/psql "${settings.dbSuperuserURI}" -X -q << EOF
+          begin;
+
+          select tests.run() "test results";
+
+          rollback;
+        EOF
+
+        ${stopDaemon} > /dev/null
       '';
 }
