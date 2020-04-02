@@ -535,3 +535,143 @@ comment on function tests.impersonate is
 
 ```
 
+## Tests
+
+
+### Test authorization functions
+
+Tests for the authorization functions:
+
+```sql
+create function tests.test_auth()
+    returns setof text
+    language plpgsql
+    as $tests$
+        declare
+            alice_user_id bigint;
+            bob_user_id bigint;
+            session_token text;
+            session_expires timestamptz;
+            session_expires_refreshed timestamptz;
+            user_info record;
+        begin
+            insert into app.users(email, name, password) values
+                ('alice@test.org', 'Alice', 'alicesecret')
+                returning user_id
+                into alice_user_id;
+
+            insert into app.users(email, name, password) values
+                ('bob@test.org', 'Bob', 'bobsecret')
+                returning user_id
+                into alice_user_id;
+
+            -- invalid password
+
+            select auth.login('alice@test.org', 'invalid')
+                into session_token;
+
+            return next is(
+                session_token,
+                null,
+                'No session should be created with an invalid password'
+            );
+
+            -- invalid email
+
+            select auth.login('invalid', 'alicesecret')
+                into session_token;
+
+            return next is(
+                session_token,
+                null,
+                'No session should be created with an invalid user'
+            );
+
+            -- valid login returns session token
+
+            select auth.login('alice@test.org', 'alicesecret')
+                into session_token;
+
+            return next isnt(
+                session_token,
+                null,
+                'Session token should be created for valid credentials'
+            );
+
+            -- invalid login via the api
+
+            prepare invalid_api_login as
+                select api.login('bob@test.org', 'invalid');
+
+            return next throws_ok(
+                'invalid_api_login',
+                'insufficient_privilege',
+                'The api.login endpoint should throw on invalid logins'
+            );
+
+            -- login via the api
+
+            select api.login('bob@test.org', 'bobsecret')
+                into user_info;
+
+            return next isnt(
+                user_info,
+                null,
+                'The api.login endpoint should return the user data'
+            );
+
+            reset role;
+
+            -- remember the current expiry time for later tests
+
+            select sessions.expires
+                into session_expires
+                from auth.active_sessions sessions
+                where token = session_token;
+
+            -- check for valid session
+
+            return next ok(
+                exists(select 1
+                    from auth.active_sessions
+                    where user_id = alice_user_id),
+                'There should be a session for the logged in user'
+            );
+
+            perform set_config(
+                'request.cookie.session_token',
+                session_token,
+                true
+            );
+
+            set role webuser;
+            perform api.refresh_session();
+            reset role;
+
+            select sessions.expires
+                into session_expires_refreshed
+                from auth.active_sessions sessions
+                where token = session_token;
+
+            return next ok(
+                session_expires < session_expires_refreshed,
+                'Sessions should expire later when refreshed.'
+            );
+
+            -- logging out
+
+            set role webuser;
+            perform api.logout();
+            reset role;
+
+            return next ok(
+                not exists(select 1
+                    from auth.active_sessions
+                    where token = session_token),
+                'There should be no active session after logging out'
+            );
+
+        end;
+    $tests$;
+
+```
