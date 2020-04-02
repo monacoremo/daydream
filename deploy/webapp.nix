@@ -27,6 +27,7 @@ rec {
         echo "Generating Elm bindings..."
         ${events}/bin/elmgen --target-directory "$workdir/src"
         ${generatePostgrestBindings}
+        ${elmPackages.elm-format}/bin/elm-format "$workdir/src/Api" --yes
 
         echo "Building..."
         cd "$workdir"

@@ -1,13 +1,3 @@
-# Finalize application setup
-
-## Commit changes
-
-We are done with defining the application and commit all changes:
-
-```sql
-commit;
-
-```
 
 ## Run all tests
 

@@ -1,21 +1,5 @@
 # Basic setup
 
-## psql script settings
-
-To begin, we set the script to be quiet and to stop if an error occurs:
-
-```sql
-\set QUIET on
-\set ON_ERROR_STOP on
-
-```
-
-This uses the `\set` [Meta
-Command](https://www.postgresql.org/docs/12/app-psql.html#APP-PSQL-META-COMMANDS)
-of `psql` to set the respective
-[variables](https://www.postgresql.org/docs/12/app-psql.html#APP-PSQL-VARIABLES).
-We will use more `psql` Meta Commands in the course of this script.
-
 ### Create extensions
 
 In this application, we are going to use the `pgcrypto` extension to salt and
@@ -203,8 +187,6 @@ be run whenever needed, e.g. after migrations.
 
 ```sql
 \echo 'Setting up tests...'
-
-begin;
 
 create schema tests;
 

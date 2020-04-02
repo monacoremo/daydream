@@ -149,7 +149,6 @@ tables in the `app` schema down completely using Row Level Security:
 
 ```sql
 alter table app.users enable row level security;
-alter table app.todos enable row level security;
 
 ```
 
