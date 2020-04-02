@@ -5,22 +5,18 @@ rec {
 
   postgresql =
     pkgs.postgresql_12.withPackages
-      (
-        ps: [
-          ps.pgtap
-        ]
-      );
+      (ps: [
+        ps.pgtap
+      ]);
 
   python =
     pkgs.python38.withPackages
-      (
-        ps: [
+      (ps: [
           ps.pytest
           ps.requests
           ps.selenium
           ps.click
-        ]
-      );
+      ]);
 
   logmux =
     deploy/utils/logmux.py;

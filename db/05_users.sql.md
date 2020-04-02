@@ -27,6 +27,7 @@ capitalizing it differently.
 To validate the email, it would be best to create a [custom
 domain](https://dba.stackexchange.com/a/165923):
 
+
 create extension plperl;
 create language plperlu;
 
@@ -310,4 +311,3 @@ superuser role.
 reset role;
 
 ```
-

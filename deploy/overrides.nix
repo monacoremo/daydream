@@ -32,6 +32,8 @@ rec {
         attrs.configureFlags ++ [ "--with-perl" ];
 
       buildInputs =
-        attrs.buildInputs ++ [ pkgs.perl ];
+        attrs.buildInputs ++ [
+          (pkgs.perl.withPackages (ps: [ ps.EmailValid ]))
+        ];
     });
 }
