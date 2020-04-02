@@ -49,6 +49,7 @@ pkgs.stdenv.mkDerivation {
     pkgs.elmPackages.elm
     pkgs.elmPackages.elm-format
     pkgs.silver-searcher
+    pkgs.cabal2nix
   ];
 
   shellHook = ''

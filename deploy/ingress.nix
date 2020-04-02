@@ -31,7 +31,7 @@ let
             keepalive_timeout 65s;
 
             server {
-                listen $FULLSTACK_PORT;
+                listen ${settings.port};
 
                 # add_header Content-Security-Policy "default-src 'self'; style-src 'unsafe-inline'";
                 # add_header X-Content-Type-Options "nosniff";
