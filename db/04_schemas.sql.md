@@ -1,3 +1,5 @@
+# Schemas
+
 ## App schema
 
 The `app` schema will contain the current state and business logic of the
@@ -61,24 +63,21 @@ grant usage on schema api to anonymous, webuser;
 
 ```
 
+## Auth schema
 
-## Test schema
-
-We need to make sure that the permissions and policies that we set up actually
-work. The following tests will be maintained with the database schema and can
-be run whenever needed, e.g. after migrations.
+We create an `auth` schema that will be owned by the `auth` role:
 
 ```sql
-\echo 'Setting up tests...'
+\echo 'Creating the auth schema...'
 
-create schema tests;
+create schema authorization auth;
+
+comment on schema auth is
+    'Schema that handles sessions and authorization.';
 
 ```
 
-
 ## Tests
-
-### Test schemas
 
 We will use [pgTAP](https://pgtap.org/) functions to describe our tests. You'll
 find a full listing of the assertions functions you can user in the [pgTAP
@@ -130,42 +129,5 @@ create function tests.test_schemas()
 
 comment on function tests.test_schemas is
     'Test that the schemas and the access to them is set up correctly.';
-
-```
-
-### Test role memberships
-
-The `authenticator` role needs to be granted the `anonymous` and `webuser`
-roles.
-
-```sql
-create function tests.test_roles()
-    returns setof text
-    language plpgsql
-    as $$
-    begin
-        return next is_member_of('anonymous', ARRAY['authenticator']);
-        return next is_member_of('webuser', ARRAY['authenticator']);
-    end;
-    $$;
-
-comment on function tests.test_roles is
-    'Make sure that the roles are set up correctly.';
-
-```
-
-
-### Test runner
-
-To conclude the `tests` schema, we set up a function that we can call anytime to
-run all tests.
-
-```sql
-create function tests.run()
-    returns setof text
-    language sql
-    as $$
-        select runtests('tests'::name, '^test_');
-    $$;
 
 ```

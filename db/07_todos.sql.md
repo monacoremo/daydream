@@ -1,5 +1,4 @@
-
-### To-dos
+# Todos
 
 In this example application we will manage to-do items, as they are simple and
 still well suited to demonstrate the security mechanisms and PostgREST
@@ -86,7 +85,7 @@ cases, e.g. when performing joins of embeds. This would be very challenging to
 implement reliably outside the database.
 
 
-#### Access to `app.todos`
+### Access to `app.todos`
 
 Users should be able to read todo items that they own or that are public.
 They should only be able to write their own todo items.
@@ -113,7 +112,7 @@ create policy webuser_write_todo
 
 ```
 
-# API
+## API
 
 
 ```sql
@@ -156,7 +155,6 @@ grant
     to webuser;
 
 ```
-
 
 ### Resetting role from `api` to the superuser
 

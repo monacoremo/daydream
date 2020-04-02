@@ -1,18 +1,4 @@
 
-## Auth schema
-
-We create an `auth` schema that will be owned by the `auth` role:
-
-```sql
-\echo 'Creating the auth schema...'
-
-create schema authorization auth;
-
-comment on schema auth is
-    'Schema that handles sessions and authorization.';
-
-```
-
 ### Switch to the `auth` role
 
 All following tables and functions should be owned by the `auth` role. The
@@ -514,6 +500,8 @@ reset role;
 
 ```
 
+## Tests
+
 ### Helper function for impersonating users in tests
 
 We will need to repeatedly impersonate users for our tests, so let's define a
@@ -534,9 +522,6 @@ comment on function tests.impersonate is
     'Impersonate the given role and user.';
 
 ```
-
-## Tests
-
 
 ### Test authorization functions
 

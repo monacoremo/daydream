@@ -1,9 +1,4 @@
-
-### Users
-
-#### `users` table
-
-The `users` table tracks the users of our application.
+# Users
 
 ```sql
 create table app.users
@@ -20,7 +15,7 @@ comment on table app.users is
 
 ```
 
-#### Email validation
+## Email validation
 
 The unique constraint on email will make sure, that an email address can only
 be used by one user at a time. PostgreSQL will create an index in order to
@@ -32,32 +27,31 @@ capitalizing it differently.
 To validate the email, it would be best to create a [custom
 domain](https://dba.stackexchange.com/a/165923):
 
-> This code snippet is not part of the application
+create extension plperl;
+create language plperlu;
 
-    create extension plperl;
-    create language plperlu;
+create function validate_email(email citext)
+    returns boolean
+    language plperlu
+    immutable
+    leakproof
+    strict
+    as $$
+         use Email::Valid;
+         my $email = shift;
+         Email::Valid->address($email) or die "Invalid email address: $email\n";
+         return 'true';
+    $$;
 
-    create function validate_email(email citext)
-        returns boolean
-        language plperlu
-        immutable
-        leakproof
-        strict
-        as $$
-             use Email::Valid;
-             my $email = shift;
-             Email::Valid->address($email) or die "Invalid email address: $email\n";
-             return 'true';
-        $$;
+create domain valid_email as citext not null
+    constraint valid_email_check check (validate_email(value))
 
-    create domain valid_email as citext not null
-        constraint valid_email_check check (validate_email(value))
 
 We could then use `valid_email` as the column type. We will skip this for this
 example, as it would require another extension that might not be available by
 default.
 
-#### Hashing passwords
+## Hashing passwords
 
 We need to salt and hash all passwords, which we will ensure using a trigger.
 
@@ -104,7 +98,7 @@ that can be used before `begin` to declare variables, as we will see later.
 The trigger we defined here will fire on any change of the `password` field and
 make sure that only salted and hashed passwords are saved in the database.
 
-#### Permissions on the `users` table
+## Permissions on the `users` table
 
 The `auth` role will need to be able to reference the users and to select
 certain fields in order to validate credentials:
@@ -139,9 +133,9 @@ grant all on app.users_user_id_seq to api;
 > but it seems more practicable to keep the permission grants
 > close to the definition of each object.
 
-### Row Level Security and policies
+## Row Level Security and policies
 
-#### Enable Row Level Security
+### Enable Row Level Security
 
 We want to make sure that `users` and `todos` can only be accessed by who
 is supposed to have access to them. As a first step, we are going to lock the
@@ -162,7 +156,7 @@ PostgreSQL will make sure that our policies are consistently applied in all
 cases, e.g. when performing joins of embeds. This would be very challenging to
 implement reliably outside the database.
 
-#### Helper function: Current `user_id`
+### Helper function: Current `user_id`
 
 Our Row Level Security policies will need to access the `user_id` of the
 currently authenticated user. See [`auth.authenticate`](#authentication-hook)
@@ -188,7 +182,7 @@ grant execute on function app.current_user_id to api, webuser;
 
 ```
 
-#### Policies on `app.users`
+### Policies on `app.users`
 
 Web-users should be able to see all other users (we'll restrict the columns
 through the API views), but only edit their own record.
@@ -237,7 +231,7 @@ create policy api_insert_user
 
 ```
 
-# API
+## API
 
 ### Switch to `api` role
 

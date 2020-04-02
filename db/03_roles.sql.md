@@ -1,11 +1,11 @@
-## Roles
+# Roles
 
 Roles in PostgreSQL apply to the database cluster (i.e. the set of databases
 managed by one PostgreSQL server) as a whole. Setting up the roles for our
 application is the only part that might encounter conflicts when run on a fresh
 database. We are going to set up all the required roles here.
 
-### Authenticator role and its sub-roles
+## Authenticator role and its sub-roles
 
 PostgREST will log in as the `authenticator` role and switch to either the
 `anonymous` or `webuser` roles, based on the results of authentication.
@@ -51,7 +51,7 @@ Alternatively, you can use the `psql` meta command `\password authenticator`
 interactively, which will make sure that the password does not appear In any
 logs or history files.
 
-### Auth and API roles
+## Auth and API roles
 
 The `auth` and `api` roles will own their respective schemas including the
 tables, views and functions defined in them.
@@ -72,7 +72,7 @@ comment on role api is
 You might choose to add more roles and even separate APIs with fine grained
 privileges when your application grows.
 
-### Revoke default execute privileges on newly defined functions
+## Revoke default execute privileges on newly defined functions
 
 By default, all database users (identified by the role `PUBLIC`, which is
 granted to all roles by default) have privileges to execute any function that
@@ -92,5 +92,26 @@ roles, as the defaults apply per user.
 
 ```sql
 alter default privileges for role auth, api revoke execute on functions from public;
+
+```
+
+## Test role memberships
+
+The `authenticator` role needs to be granted the `anonymous` and `webuser`
+roles.
+
+```sql
+create function tests.test_roles()
+    returns setof text
+    language plpgsql
+    as $$
+    begin
+        return next is_member_of('anonymous', ARRAY['authenticator']);
+        return next is_member_of('webuser', ARRAY['authenticator']);
+    end;
+    $$;
+
+comment on function tests.test_roles is
+    'Make sure that the roles are set up correctly.';
 
 ```
