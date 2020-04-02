@@ -32,7 +32,7 @@ pkgs.stdenv.mkDerivation {
     fullstack.python
     fullstack.webapp.build
     fullstack.webapp.watch
-    fullstack.webapp.generatePostgrestBindings
+    fullstack.webapp.generatePostgrestBindings.script
     fullstack.tests.run
     fullstack.tests.watch
     fullstack.geckodriver
@@ -50,5 +50,7 @@ pkgs.stdenv.mkDerivation {
     source "$(fullstack-local-mkenv . "$tmpdir")"
     trap "rm -rf $tmpdir" exit
     echo "Environment set up in $tmpdir"
+
+    echo "${fullstack.settings.dbURI}"
   '';
 }

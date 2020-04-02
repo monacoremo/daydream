@@ -13,7 +13,7 @@ rec {
         ln -sf "$srcdir"/index.html "$webroot"/index.html
 
         ${events}/bin/elmgen --target-directory "$workdir/src"
-        ${generatePostgrestBindings}/bin/fullstack-webapp-postgrest-gen
+        ${generatePostgrestBindings.bin}
 
         cd "$workdir"
 
@@ -25,7 +25,7 @@ rec {
       '';
 
   generatePostgrestBindings =
-    checkedShellScript.writeBin "fullstack-webapp-postgrest-gen"
+    checkedShellScript.script "fullstack-webapp-postgrest-gen"
       ''
         targetdir="$FULLSTACK_WEBAPP_DIR"/src
 

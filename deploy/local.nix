@@ -1,6 +1,6 @@
 { stdenv, checkedShellScript, runtimeShell, shellcheck, pwgen, ncurses,
 utillinux, writeText, envsubst, unixtools, python }:
-{ db, api, ingress, webapp }:
+{ settings, db, api, ingress, webapp }:
 
 
 let
@@ -77,43 +77,43 @@ rec {
         cat << EOF > "$envfile"
         #!${runtimeShell}
 
-        export FULLSTACK_SRC="$sourcedir"
-        export FULLSTACK_PORT=8000
-        export FULLSTACK_DIR="$basedir"
-        export FULLSTACK_URI="http://localhost:\$FULLSTACK_PORT"
-        export FULLSTACK_DB_DIR="\$FULLSTACK_DIR/db"
-        export FULLSTACK_DB_LOGFILE="\$FULLSTACK_DIR/db.log"
-        export FULLSTACK_DB_SRC="$sourcedir/db"
-        export FULLSTACK_DB_HOST="\$FULLSTACK_DB_DIR"
-        export FULLSTACK_DB_DBNAME=postgres
-        export FULLSTACK_DB_SUPERUSER=postgres
-        export FULLSTACK_DB_URI="postgresql:///\$FULLSTACK_DB_DBNAME?host=\$FULLSTACK_DB_HOST"
-        export FULLSTACK_DB_SUPERUSER_PW=$(${pwgen}/bin/pwgen 32 1)
-        export FULLSTACK_DB_APISERVER_PW=$(${pwgen}/bin/pwgen 32 1)
-        export FULLSTACK_DB_SETUPHOST="\$FULLSTACK_DB_DIR/setupsocket"
-        export FULLSTACK_DB_SUPERUSER_SETUP_URI="postgresql:///\$FULLSTACK_DB_DBNAME?host=\$FULLSTACK_DB_SETUPHOST&user=\$FULLSTACK_DB_SUPERUSER&password=\$FULLSTACK_DB_SUPERUSER_PW"
-        export FULLSTACK_DB_SUPERUSER_URI="\$FULLSTACK_DB_URI&user=\$FULLSTACK_DB_SUPERUSER&password=\$FULLSTACK_DB_SUPERUSER_PW"
-        export FULLSTACK_DB_APISERVER_URI="\$FULLSTACK_DB_URI&user=authenticator&password=\$FULLSTACK_DB_APISERVER_PW"
+        export ${settings.vars.sourceDir}="$sourcedir"
+        export ${settings.vars.port}=8000
+        export ${settings.vars.dir}="$basedir"
+        export ${settings.vars.URI}="http://localhost:\${settings.port}"
+        export ${settings.vars.dbDir}="\${settings.dir}/db"
+        export ${settings.vars.dbLogfile}="\${settings.dir}/db.log"
+        export ${settings.vars.dbSrc}="\${settings.sourceDir}/db"
+        export ${settings.vars.dbHost}="\${settings.dbDir}"
+        export ${settings.vars.dbName}=postgres
+        export ${settings.vars.dbSuperuser}=postgres
+        export ${settings.vars.dbURI}="postgresql:///\${settings.dbName}?host=\${settings.dbHost}"
+        export ${settings.vars.dbSuperuserPassword}=$(${pwgen}/bin/pwgen 32 1)
+        export ${settings.vars.dbApiserverPassword}=$(${pwgen}/bin/pwgen 32 1)
+        export ${settings.vars.dbSetupHost}="\${settings.dbDir}/setupsocket"
+        export ${settings.vars.dbSetupURI}="postgresql:///\${settings.dbName}?host=\${settings.dbSetupHost}&user=\${settings.dbSuperuser}&password=\${settings.dbSuperuserPassword}"
+        export ${settings.vars.dbSuperuserURI}="\${settings.dbURI}&user=\${settings.dbSuperuser}&password=\${settings.dbSuperuserPassword}"
+        export ${settings.vars.dbApiserverURI}="\${settings.dbURI}&user=authenticator&password=\${settings.dbApiserverPassword}"
 
-        export FULLSTACK_API_LOGFILE="\$FULLSTACK_DIR/api.log"
-        export FULLSTACK_API_DIR="\$FULLSTACK_DIR/api"
-        export FULLSTACK_API_SOCKET="\$FULLSTACK_API_DIR/postgrest.sock"
-        export FULLSTACK_API_CONFIG="\$FULLSTACK_API_DIR/postgrest.conf"
-        export FULLSTACK_API_URI="http://unix:\$FULLSTACK_API_SOCKET:/"
+        export ${settings.vars.apiLogfile}="\${settings.dir}/api.log"
+        export ${settings.vars.apiDir}="\${settings.dir}/api"
+        export ${settings.vars.apiSocket}="\${settings.apiDir}/postgrest.sock"
+        export ${settings.vars.apiConfig}="\${settings.apiDir}/postgrest.conf"
+        export ${settings.vars.apiURI}="http://unix:\${settings.apiSocket}:/"
 
-        export FULLSTACK_WEBAPP_LOGFILE="\$FULLSTACK_DIR/webapp.log"
-        export FULLSTACK_WEBAPP_SRC="$sourcedir/webapp"
-        export FULLSTACK_WEBAPP_DIR="\$FULLSTACK_DIR/webapp"
-        export FULLSTACK_WEBAPP_WEBROOT="\$FULLSTACK_WEBAPP_DIR/webroot"
+        export ${settings.vars.webappLogfile}="\${settings.dir}/webapp.log"
+        export ${settings.vars.webappSrc}="\${settings.sourceDir}/webapp"
+        export ${settings.vars.webappDir}="\${settings.dir}/webapp"
+        export ${settings.vars.webappWebroot}="\${settings.webappDir}/webroot"
 
-        export FULLSTACK_INGRESS_LOGFILE="\$FULLSTACK_DIR/ingress.log"
-        export FULLSTACK_INGRESS_DIR="\$FULLSTACK_DIR/ingress"
+        export ${settings.vars.ingressLogfile}="\${settings.dir}/ingress.log"
+        export ${settings.vars.ingressDir}="\${settings.dir}/ingress"
 
         # psql variables for convenience
-        export PGHOST="\$FULLSTACK_DB_HOST"
-        export PGDATABASE="\$FULLSTACK_DB_DBNAME"
-        export PGUSER="\$FULLSTACK_DB_SUPERUSER"
-        export PGPASSWORD="\$FULLSTACK_DB_SUPERUSER_PW"
+        export PGHOST="\${settings.dbHost}"
+        export PGDATABASE="\${settings.dbName}"
+        export PGUSER="\${settings.dbSuperuser}"
+        export PGPASSWORD="\${settings.dbSuperuserPassword}"
 
         EOF
 

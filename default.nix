@@ -23,11 +23,16 @@ rec {
   geckodriver =
     pkgs.geckodriver;
 
+  appName = "Fullstack";
+
+  settings =
+    (pkgs.callPackage deploy/settings.nix {}) { inherit appName; };
+
   events =
-    (import ./events/default.nix).events;
+    (import events/default.nix).events;
 
   postgrestToElm =
-    (import ./postgrest-to-elm/default.nix).postgrestToElm;
+    (import postgrest-to-elm/default.nix).postgrestToElm;
 
   postgrest =
     pkgs.callPackage deploy/postgrest.nix {};
@@ -50,7 +55,7 @@ rec {
 
   deployLocal =
     pkgs.callPackage deploy/local.nix { inherit checkedShellScript python; }
-      { inherit db api ingress webapp; };
+      { inherit settings db api ingress webapp; };
 
   tests =
     pkgs.callPackage deploy/tests.nix { inherit checkedShellScript python deployLocal; };
