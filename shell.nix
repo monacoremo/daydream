@@ -17,7 +17,7 @@ let
   project =
     pkgs.callPackage ./default.nix {};
 in
-pkgs.stdenv.mkDerivation {
+pkgs.mkShell {
   name = "${project.settings.appName}-env";
 
   buildInputs = [
