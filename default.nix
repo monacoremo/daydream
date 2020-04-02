@@ -26,11 +26,15 @@ rec {
   events =
     (import ./events/default.nix).events;
 
+  postgrestToElm =
+    (import ./postgrest-to-elm/default.nix).postgrestToElm;
+
   postgrest =
     pkgs.callPackage deploy/postgrest.nix {};
 
   webapp =
-    pkgs.callPackage deploy/webapp.nix { inherit events; };
+    pkgs.callPackage deploy/webapp.nix
+      { inherit events db deployLocal checkedShellScript postgrestToElm; };
 
   ingress =
     pkgs.callPackage deploy/ingress.nix { inherit checkedShellScript; };

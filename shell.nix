@@ -32,6 +32,7 @@ pkgs.stdenv.mkDerivation {
     fullstack.python
     fullstack.webapp.build
     fullstack.webapp.watch
+    fullstack.webapp.generatePostgrestBindings
     fullstack.tests.run
     fullstack.tests.watch
     fullstack.geckodriver

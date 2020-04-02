@@ -12,8 +12,7 @@
         text =
           ''
             #!${runtimeShell}
-            set -e
-            set -u
+            set -euo pipefail
 
             ${text}
           '';
@@ -40,9 +39,8 @@
           text =
             ''
               #!${runtimeShell}
-              set -e
-              set -u
-            
+              set -euo pipefail
+
               ${text}
             '';
           checkPhase =

@@ -1,11 +1,9 @@
-{ writeShellScriptBin, elmPackages, entr, events }:
+{ elmPackages, entr, events, db, deployLocal, checkedShellScript, postgrestToElm }:
 
 rec {
   build =
-    writeShellScriptBin "fullstack-webapp-build"
+    checkedShellScript.writeBin "fullstack-webapp-build"
       ''
-        set -euo pipefail
-
         srcdir="$FULLSTACK_WEBAPP_SRC"
         workdir="$FULLSTACK_WEBAPP_DIR"
         webroot="$FULLSTACK_WEBAPP_WEBROOT"
@@ -15,6 +13,7 @@ rec {
         ln -sf "$srcdir"/index.html "$webroot"/index.html
 
         ${events}/bin/elmgen --target-directory "$workdir/src"
+        ${generatePostgrestBindings}/bin/fullstack-webapp-postgrest-gen
 
         cd "$workdir"
 
@@ -25,8 +24,29 @@ rec {
         cp "$workdir"/app.js "$webroot"/app.js
       '';
 
+  generatePostgrestBindings =
+    checkedShellScript.writeBin "fullstack-webapp-postgrest-gen"
+      ''
+        targetdir="$FULLSTACK_WEBAPP_DIR"/src
+
+        tmpdir="$(mktemp -d)"
+        trap 'rm -rf $tmpdir' exit
+
+        # shellcheck disable=SC1090
+        source "$(${deployLocal.mkEnv}/bin/fullstack-local-mkenv . "$tmpdir")"
+
+        ${db.setup}/bin/fullstack-db-setup
+        ${db.startDaemon}/bin/fullstack-db-daemon-start
+
+        ${postgrestToElm}/bin/postgrest-to-elm \
+          --db-uri "$FULLSTACK_DB_APISERVER_URI" --role webuser --schema api \
+          --target-directory "$targetdir"
+
+        ${db.stopDaemon}/bin/fullstack-db-daemon-stop
+      '';
+
   watch =
-    writeShellScriptBin "fullstack-webapp-watch"
+    checkedShellScript.writeBin "fullstack-webapp-watch"
       ''
         find "$FULLSTACK_WEBAPP_SRC" | \
           ${entr}/bin/entr -d ${build}/bin/fullstack-webapp-build
