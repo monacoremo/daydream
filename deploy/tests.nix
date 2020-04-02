@@ -1,4 +1,10 @@
-{ settings, python, checkedShellScript, deployLocal, curl, entr }:
+{ settings
+, python
+, checkedShellScript
+, deployLocal
+, curl
+, entr
+}:
 
 let
   testPython =

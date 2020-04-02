@@ -1,4 +1,8 @@
-{ writeTextFile, runtimeShell, stdenv, shellcheck}:
+{ writeTextFile
+, runtimeShell
+, stdenv
+, shellcheck
+}:
 
 let
   writeBin =

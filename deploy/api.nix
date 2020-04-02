@@ -1,4 +1,9 @@
-{ settings, writeText, checkedShellScript, postgrest, entr }:
+{ settings
+, writeText
+, checkedShellScript
+, postgrest
+, entr
+}:
 
 let
   postgrestConf =

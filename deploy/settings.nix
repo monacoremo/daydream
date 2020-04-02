@@ -1,4 +1,6 @@
-{ lib, appName }:
+{ lib
+, appName
+}:
 
 let
   prefix = "${lib.toUpper appName}_";

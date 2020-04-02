@@ -1,6 +1,12 @@
 let
+  nixpkgsVersion =
+    import deploy/nixpkgs-version.nix;
+
   pinnedPkgs =
-    import deploy/nixpkgs.nix;
+    builtins.fetchTarball {
+      url = "https://github.com/nixos/nixpkgs/archive/${nixpkgsVersion.rev}.tar.gz";
+      sha256 = nixpkgsVersion.tarballHash;
+    };
 
   packageOverrides =
     import deploy/overrides.nix;
