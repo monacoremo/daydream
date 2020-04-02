@@ -29,10 +29,10 @@ rec {
     pkgs.callPackage deploy/settings.nix { inherit appName; };
 
   events =
-    (import events/default.nix).events;
+    (pkgs.callPackage events/default.nix {}).events;
 
   postgrestToElm =
-    (import postgrest-to-elm/default.nix).postgrestToElm;
+    (pkgs.callPackage postgrest-to-elm/default.nix {}).postgrestToElm;
 
   postgrest =
     pkgs.callPackage deploy/postgrest.nix {};

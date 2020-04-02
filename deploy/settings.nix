@@ -41,6 +41,8 @@ let
   vals = lib.mapAttrs (name: value: "$" + value) vars;
 
   fixed = {
+    inherit appName;
+
     binPrefix = "${lib.toLower appName}-";
   };
 in
