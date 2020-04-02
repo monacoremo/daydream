@@ -54,16 +54,45 @@ apiTableToElm rootModuleName apiTable =
 
         endpointQualified =
             Elm.Qualified endpointModuleName
+
+        getEndpoint :: Elm.Definition
+        getEndpoint =
+            Elm.Constant
+                (endpointQualified "get")
+                0
+                (Bound.toScope $ vacuous $ ElmType.Global (endpointQualified "Test"))
+                (Elm.List [])
+
+        typeDef :: Elm.Definition
+        typeDef =
+            Elm.Alias
+                (typeQualified typeName)
+                0
+                (Bound.toScope $ vacuous $ ElmType.Record
+                    [(Elm.Field "field", ElmType.Global (typeQualified "Test"))]
+                )
+
+        fieldType :: Elm.Definition
+        fieldType =
+            Elm.Alias
+                (typeQualified "Field")
+                0
+                (Bound.toScope $ vacuous $ ElmType.Record
+                    [ ( Elm.Field "decoder"
+                      , ElmType.Global (Elm.Qualified ["Json", "Decode"] "Decoder")
+                      )
+                    , ( Elm.Field "encode"
+                      , ElmType.Global (Elm.Qualified ["Json", "Encode"] "Encoder")
+                      )
+                    , ( Elm.Field "name"
+                      , ElmType.Global (Elm.Qualified ["Basics"] "String")
+                      )
+                    ]
+                )
+
+        -- define fields as a type
     in
-    [ Elm.Constant
-        (endpointQualified "get")
-        0
-        (Bound.toScope $ vacuous $ ElmType.Global (endpointQualified "Test"))
-        (Elm.List [])
-    , Elm.Alias
-        (typeQualified typeName)
-        0
-        (Bound.toScope $ vacuous $ ElmType.Record
-            [(Elm.Field "field", ElmType.Global (typeQualified "Test"))]
-        )
+    [ getEndpoint
+    , typeDef
+    , fieldType
     ]
