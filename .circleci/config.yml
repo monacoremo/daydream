@@ -6,16 +6,12 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Pre-load Nix environment for the basic application
-          command: nix-shell --run "echo Loaded basic Nix environment"
-      - run:
-          name: Pre-load Nix environment for the full stack application
+          name: Pre-load Nix environment
           command: |
-            cd fullstack
             nix-shell --run "echo Loaded full stack Nix environment"
       - run:
           name: Set up the test result directory structure
-          command: mkdir -p test-results/{basic,basic-repeat,fullstack,fullstack-repeat}
+          command: mkdir -p test-results
       - run:
           name: Grant access to the non-root test user
           command: |
@@ -26,17 +22,6 @@ jobs:
           name: Run tests for the basic application
           command: |
             nix-shell --run \
-              'su-exec user:user ./deploy/test-local.sh --junitxml=test-results/basic/junit.xml'
-      - run:
-          name: Re-run basic tests to make sure that they are idempotent
-          command: |
-            nix-shell --run \
-              'su-exec user:user ./deploy/test-local.sh --junitxml=test-results/basic-repeat/junit.xml'
-      - run:
-          name: Run tests for the full stack application
-          command: |
-            chown -R user:user /root 
-            cd fullstack
-            nix-shell --run "su-exec user:user fullstack-tests-run --junitxml=test-results/fullstack/junit.xml" 
+              'su-exec user:user nix-shell --run "daydream-tests-run --junitxml=test-results/basic/junit.xml"'
       - store_test_results:
-            path: test-results
+          path: test-results
