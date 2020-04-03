@@ -22,6 +22,6 @@ jobs:
           name: Run tests for the basic application
           command: |
             nix-shell --run \
-              'su-exec user:user nix-shell --run "daydream-tests-run --junitxml=test-results/basic/junit.xml"'
+              'su-exec user:user daydream-tests-run --junitxml=test-results/junit.xml"'
       - store_test_results:
           path: test-results
