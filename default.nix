@@ -73,9 +73,6 @@ rec {
   python =
     pkgs.python38.withPackages
       (ps: [
-          ps.pytest
-          ps.requests
-          ps.selenium
           ps.click
       ]);
 
