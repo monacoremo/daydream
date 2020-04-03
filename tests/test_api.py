@@ -2,34 +2,27 @@
 Integration tests for the PostgREST sessions full stack example.
 
 '''
-
-import os
-import subprocess
 import time
 
 import requests
-import pytest
 
 
-BASE_URL = os.environ.get('TESTS_BASE_URI')
-
-
-def test_index():
+def test_index(service_endpoint):
     'Index should be available.'
-    resp = requests.get(f'{BASE_URL}/')
+    resp = requests.get(f'{service_endpoint}/')
     assert resp.status_code == 200
 
 
-def test_appjs():
+def test_appjs(service_endpoint):
     'App.js should be available'
-    resp = requests.get(f'{BASE_URL}/app.js')
+    resp = requests.get(f'{service_endpoint}/app.js')
     assert resp.status_code == 200
 
 
-def test_register():
+def test_register(service_endpoint):
     'Registering as an anonymous user should succeed.'
     session = requests.Session()
-    resp = session.post(f'{BASE_URL}/api/rpc/register', json={
+    resp = session.post(f'{service_endpoint}/api/rpc/register', json={
         'email': f'registrationtest-{time.time()}@test.org',
         'name': 'Registration Test',
         'password': 'registrationsecret',

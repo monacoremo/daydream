@@ -128,8 +128,10 @@ rec {
         export ${settings.vars.docsDir}="\${settings.dir}/docs"
 
         # testings variables
-        export TESTS_BASE_URI="\${settings.URI}"
+        export TESTS_SERVICE_BIN="${run}"
+        export TESTS_SERVICE_URI="\${settings.URI}"
         export TESTS_DB_URI="\${settings.dbSuperuserURI}"
+        export TESTS_DBTEST_BIN="${db.test}"
 
         # psql variables for convenience
         export PGHOST="\${settings.dbHost}"

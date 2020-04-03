@@ -9,7 +9,10 @@ rec {
 
   webapp =
     pkgs.callPackage deploy/webapp.nix
-      { inherit settings events db deployLocal checkedShellScript postgrestToElm; };
+    {
+      inherit settings events dbLocal dbLocalSettings deployLocal
+      checkedShellScript postgrestToElm;
+    };
 
   docs =
     pkgs.callPackage deploy/docs.nix
@@ -26,6 +29,25 @@ rec {
   db =
     pkgs.callPackage deploy/db.nix
       { inherit settings checkedShellScript postgresql md2sql; };
+
+  dbLocal =
+    pkgs.callPackage deploy/db.nix
+      { inherit checkedShellScript postgresql md2sql; settings = dbLocalSettings; };
+
+  dbLocalSettings =
+    rec {
+      binPrefix = "local-";
+      dbDir = "$LOCAL_DB_DIR";
+      dbHost = dbDir;
+      dbSuperuser = "postgres";
+      dbName = "postgres";
+      dbSuperuserPassword = "postgres";
+      dbSetupHost = "${dbDir}/setup";
+      dbSrc = settings.dbSrc;
+      dbSetupURI = "postgres:///postgres?host=${dbSetupHost}&user=postgres&password=postgres";
+      dbApiserverPassword = "localpw";
+      dbApiserverURI = "postgres:///postgres?host=${dbHost}&user=authenticator&password=${dbApiserverPassword}";
+    };
 
   deployLocal =
     pkgs.callPackage deploy/local.nix
@@ -88,5 +110,4 @@ rec {
 
   postgrestToElm =
     (pkgs.callPackage deploy/postgrest-to-elm/default.nix {}).postgrestToElm;
-
 }

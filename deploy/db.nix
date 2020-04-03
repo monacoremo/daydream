@@ -40,6 +40,8 @@ rec {
       ''
         ${env}
 
+        echo "setting up in $PGDATA"
+
         cleanup() {
           ${postgresql}/bin/pg_ctl stop -m i
           kill 0
@@ -47,8 +49,8 @@ rec {
 
         trap cleanup exit
 
-        rm -rf "${settings.dbDir}"
-        mkdir -p "${settings.dbDir}"
+        rm -rf "$PGDATA"
+        mkdir -p "$PGDATA"
 
         # Initialize the PostgreSQL cluster
         pwfile=$(mktemp)

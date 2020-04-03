@@ -2,7 +2,8 @@
 , elmPackages
 , entr
 , events
-, db
+, dbLocal
+, dbLocalSettings
 , deployLocal
 , checkedShellScript
 , postgrestToElm
@@ -41,23 +42,22 @@ rec {
 
   generatePostgrestBindings =
     checkedShellScript "${binPrefix}postgrest-gen"
-      ''
+    ''
         targetdir="${settings.webappDir}"/src
+        dbdir="$(realpath "${settings.webappDir}"/db)"
 
-        tmpdir="$(mktemp -d)"
-        trap 'rm -rf $tmpdir' exit
+        mkdir -p "$dbdir"
 
-        # shellcheck disable=SC1090
-        source "$(${deployLocal.mkEnv} . "$tmpdir")"
+        export LOCAL_DB_DIR="$dbdir"
 
-        ${db.setup} > /dev/null
-        ${db.startDaemon} > /dev/null
+        ${dbLocal.setup} > /dev/null
+        ${dbLocal.startDaemon} > /dev/null
 
         ${postgrestToElm}/bin/postgrest-to-elm \
-          --db-uri "${settings.dbApiserverURI}" --role webuser --schema api \
+          --db-uri "${dbLocalSettings.dbApiserverURI}" --role webuser --schema api \
           --target-directory "$targetdir"
 
-        ${db.stopDaemon} > /dev/null
+        ${dbLocal.stopDaemon} > /dev/null
       '';
 
   watch =
