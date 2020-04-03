@@ -13,11 +13,11 @@
 }:
 mkDerivation {
   pname = "postgrest";
-  version = "6.0.2";
+  version = "7.0.0";
   src = fetchgit {
     url = "https://github.com/PostgREST/postgrest.git";
-    sha256 = "06bklmjnma2ifx48vhv1d98xlib5c8is4i3hzvq4dc9kaamb1bcb";
-    rev = "691bb5640dabc8db637da1ae05f249a6a820bc84";
+    sha256 = "00psmh2sxmxmz68xwyq64hgc0svcvyzv23m8kvjdq9qhh30cmbb1";
+    rev = "2b61a63686b3f8f0bb7bb75d0a0c318c99be1c53";
     fetchSubmodules = true;
   };
   isLibrary = true;
@@ -35,7 +35,7 @@ mkDerivation {
   executableHaskellDepends = [
     auto-update base base64-bytestring bytestring directory either
     hasql hasql-pool hasql-transaction network protolude retry text
-    time unix warp
+    time unix wai warp
   ];
   testHaskellDepends = [
     aeson aeson-qq async auto-update base base64-bytestring bytestring
