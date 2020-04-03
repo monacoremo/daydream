@@ -48,7 +48,7 @@ rec {
     (pkgs.callPackage events/default.nix {}).events;
 
   postgrestToElm =
-    (pkgs.callPackage deploy/utils/postgrest-to-elm/default.nix {}).postgrestToElm;
+    (pkgs.callPackage deploy/postgrest-to-elm/default.nix {}).postgrestToElm;
 
   postgrest =
     pkgs.callPackage deploy/postgrest.nix {};
