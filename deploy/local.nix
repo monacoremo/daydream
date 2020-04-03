@@ -127,6 +127,10 @@ rec {
         export ${settings.vars.docsSrc}="\${settings.sourceDir}/docs"
         export ${settings.vars.docsDir}="\${settings.dir}/docs"
 
+        # testings variables
+        export TESTS_BASE_URI="\${settings.URI}"
+        export TESTS_DB_URI="\${settings.dbSuperuserURI}"
+
         # psql variables for convenience
         export PGHOST="\${settings.dbHost}"
         export PGDATABASE="\${settings.dbName}"
@@ -139,5 +143,17 @@ rec {
         ${shellcheck}/bin/shellcheck "$envfile"
 
         echo "$envfile"
+      '';
+
+  withTmpEnv =
+    checkedShellScript "${binPrefix}withtmpenv"
+      ''
+        tmpdir="$(mktemp -d)"
+        # shellcheck source=/dev/null
+        source "$(${mkEnv} . "$tmpdir")"
+
+        trap 'kill 0; rm -rf $tmpdir' exit
+
+        eval "$@"
       '';
 }

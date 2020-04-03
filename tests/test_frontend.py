@@ -13,7 +13,7 @@ import selenium.webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 
 
-BASE_URL = os.environ.get('FULLSTACK_URI', 'http://localhost:8000')
+BASE_URL = os.environ.get('TESTS_BASE_URI')
 
 
 @pytest.yield_fixture

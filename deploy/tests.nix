@@ -23,21 +23,9 @@ rec {
   run =
     checkedShellScript "${binPrefix}run"
       ''
-        set -e
+        trap 'kill 0' exit
 
-        tmpdir="$(mktemp -d)"
-        fullstack-local-mkenv . "$tmpdir"
-        # shellcheck source=/dev/null
-        source "$tmpdir/env"
-
-        cleanup() {
-            rm -rf "$tmpdir"
-            kill 0
-        }
-
-        trap cleanup exit
-
-        ${deployLocal.run} &
+        ${deployLocal.run} > /dev/null &
 
         printf "Waiting for app to become ready."
 
@@ -55,7 +43,7 @@ rec {
         echo " done."
         echo "Running tests..."
 
-        ${python}/bin/py.test tests/tests.py "$@"
+        ${python}/bin/py.test "${settings.sourceDir}"/tests "$@"
       '';
 
   watch =

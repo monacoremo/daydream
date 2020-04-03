@@ -32,6 +32,7 @@ pkgs.mkShell {
     project.deployLocal.mkEnv.bin
     project.deployLocal.run.bin
     project.deployLocal.watch.bin
+    project.deployLocal.withTmpEnv.bin
     project.ingress.run.bin
     project.webapp.build.bin
     project.webapp.watch.bin
