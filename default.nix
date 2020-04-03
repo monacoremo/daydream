@@ -77,7 +77,7 @@ rec {
       ]);
 
   postgrest =
-    pkgs.callPackage deploy/postgrest.nix {};
+    pkgs.haskellPackages.postgrest;
 
   tests =
     pkgs.callPackage deploy/tests.nix
