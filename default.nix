@@ -41,6 +41,9 @@ rec {
   geckodriver =
     pkgs.geckodriver;
 
+  firefox =
+    pkgs.firefox;
+
   settings =
     pkgs.callPackage deploy/settings.nix { inherit appName; };
 

@@ -45,15 +45,14 @@ pkgs.mkShell {
     project.postgresql
     project.postgrest
     project.python
+    project.firefox
     pkgs.bash
-    pkgs.firefox
     pkgs.curl
     pkgs.entr
     pkgs.elmPackages.elm
     pkgs.elmPackages.elm-format
     pkgs.silver-searcher
     pkgs.cabal2nix
-    pkgs.dbeaver
   ];
 
   shellHook = ''
