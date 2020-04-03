@@ -53,6 +53,7 @@ pkgs.mkShell {
     pkgs.elmPackages.elm-format
     pkgs.silver-searcher
     pkgs.cabal2nix
+    pkgs.dbeaver
   ];
 
   shellHook = ''
@@ -60,5 +61,8 @@ pkgs.mkShell {
     source "$(${project.deployLocal.mkEnv} . "$tmpdir")"
     trap 'rm -rf $tmpdir' exit
     echo "Environment for ${project.settings.appName} set up in $tmpdir"
+
+    # disable line wrap in psql
+    export PAGER="less -S"
   '';
 }

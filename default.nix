@@ -3,8 +3,19 @@
 rec {
   appName = "daydream";
 
+  postgresqlWithPerl =
+    pkgs.postgresql_12.overrideAttrs (attrs: {
+      configureFlags =
+        attrs.configureFlags ++ [ "--with-perl" ];
+
+      buildInputs =
+        attrs.buildInputs ++ [
+          (pkgs.perl.withPackages (ps: [ ps.EmailValid ]))
+        ];
+    });
+
   postgresql =
-    pkgs.postgresql_12.withPackages
+    postgresqlWithPerl.withPackages
       (ps: [
         ps.pgtap
       ]);

@@ -25,15 +25,4 @@ rec {
           newHaskellPkgs.callPackage haskell/configurator-pg.nix {};
       };
     };
-
-  postgresql_12 =
-    pkgs.postgresql_12.overrideAttrs (attrs: {
-      configureFlags =
-        attrs.configureFlags ++ [ "--with-perl" ];
-
-      buildInputs =
-        attrs.buildInputs ++ [
-          (pkgs.perl.withPackages (ps: [ ps.EmailValid ]))
-        ];
-    });
 }
