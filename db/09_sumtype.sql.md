@@ -29,6 +29,11 @@ create table app.animals
 
 ```
 
+```sql
+alter table app.animals enable row level security;
+
+```
+
 ## Fixtures
 
 Create some fixtures:
@@ -51,7 +56,7 @@ Not all fields set for the constructor:
     insert into animals(animal_type, dog_name) values ('dog', 'rex');
 
 ## API
- 
+
 ```sql
 set role api;
 

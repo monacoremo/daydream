@@ -101,7 +101,9 @@ create function tests.test_schemas()
             'app',
             ARRAY[
                 'users',
-                'todos'
+                'todos',
+                'lineitems',
+                'animals'
             ]
         );
 

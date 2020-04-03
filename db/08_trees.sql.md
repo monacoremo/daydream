@@ -43,6 +43,11 @@ The `positions` column might have holes, e.g. a item might be at position
 for us, as our data still describes a valid order of the siblings. It's
 impossible to represent an invalide state.
 
+```sql
+alter table app.lineitems enable row level security;
+
+```
+
 ## API
 
 ### Data queries
