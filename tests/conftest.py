@@ -26,7 +26,7 @@ def service_endpoint():
 
 @contextmanager
 def service_process():
-    '''Spin up and terminates the service.'''
+    '''Spin up and terminate the service.'''
 
     # spawn process with a new process group, so that it can be terminated by
     # itself
