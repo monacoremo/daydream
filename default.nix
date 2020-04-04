@@ -1,6 +1,22 @@
-{ pkgs }:
+let
+  nixpkgsVersion =
+    import deploy/nixpkgs-version.nix;
 
+  pinnedPkgs =
+    builtins.fetchTarball {
+      url = "https://github.com/nixos/nixpkgs/archive/${nixpkgsVersion.rev}.tar.gz";
+      sha256 = nixpkgsVersion.tarballHash;
+    };
+
+  packageOverrides =
+    import deploy/overrides.nix;
+
+  pkgs =
+    import pinnedPkgs { config = { inherit packageOverrides; }; };
+in
 rec {
+  inherit pkgs;
+
   appName = "daydream";
 
   settings =

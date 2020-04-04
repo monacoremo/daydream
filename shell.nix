@@ -1,23 +1,7 @@
 let
-  nixpkgsVersion =
-    import deploy/nixpkgs-version.nix;
-
-  pinnedPkgs =
-    builtins.fetchTarball {
-      url = "https://github.com/nixos/nixpkgs/archive/${nixpkgsVersion.rev}.tar.gz";
-      sha256 = nixpkgsVersion.tarballHash;
-    };
-
-  packageOverrides =
-    import deploy/overrides.nix;
-
-  pkgs =
-    import pinnedPkgs { config = { inherit packageOverrides; }; };
-
-  project =
-    pkgs.callPackage ./default.nix {};
+  project = import ./default.nix;
 in
-pkgs.mkShell {
+project.pkgs.mkShell {
   name = "${project.settings.appName}-env";
 
   buildInputs = [
@@ -47,13 +31,13 @@ pkgs.mkShell {
     project.postgrest
     project.python
     project.firefox
-    pkgs.bash
-    pkgs.curl
-    pkgs.entr
-    pkgs.elmPackages.elm
-    pkgs.elmPackages.elm-format
-    pkgs.silver-searcher
-    pkgs.cabal2nix
+    project.pkgs.bash
+    project.pkgs.curl
+    project.pkgs.entr
+    project.pkgs.elmPackages.elm
+    project.pkgs.elmPackages.elm-format
+    project.pkgs.silver-searcher
+    project.pkgs.cabal2nix
   ];
 
   shellHook = ''

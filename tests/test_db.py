@@ -11,7 +11,6 @@ import subprocess
 import time
 
 import pytest
-import tap.parser
 
 
 DBTEST_BIN = os.environ.get('TESTS_DBTEST_BIN')
