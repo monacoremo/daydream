@@ -44,9 +44,11 @@ def test_db():
 
     tap_lines = [line[1:] for line in result_lines[2:-3]]
 
-    parsed = [parse_tap_line(line) for line in tap_lines]
+    parsed_lines = [parse_tap_line(line) for line in tap_lines]
 
-    assert all(line.ok for line in parsed if isinstance(line, TapTestLine)), 'all tests expected to pass'
+    for line in parsed_lines:
+        if isinstance(line, TapTestLine):
+            assert line.ok, f'{line.description} did not pass'
 
 
 def parse_tap_line(line):
@@ -72,3 +74,5 @@ def parse_tap_line(line):
     elif subtest:
         indent, name = subtest.groups()
         return TapSubtest(indent=indent, name=name)
+    else:
+        return line
