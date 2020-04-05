@@ -15,9 +15,9 @@ jobs:
             export USER=root
             cachix use monacoremo
       - run:
-          name: Pre-load Nix environment
+          name: Install the application
           command: |
-            nix-shell --run "echo Loaded Nix environment"
+            nix-env -iA deployLocal.withTmpEnv.bin deployLocal.run tests.run -f default.nix
       - run:
           name: Set up the test result directory structure
           command: mkdir -p test-results
@@ -27,11 +27,15 @@ jobs:
             # There must be a better way to do this...
             chown -R user:user /root/project
             chmod o+xr /root /root/project
+
+            # Elm needs a home directory
+            mkdir -p /home/user
+            chown user:user /home/user
       - run:
           name: Run tests
           command: |
-            nix-shell --run \
-              'su-exec user:user daydream-local-withtmpenv daydream-tests-run --junitxml=test-results/junit.xml'
+            su-exec user:user daydream-local-withtmpenv daydream-tests-run \
+              --junitxml=test-results/junit.xml
       - store_test_results:
           path: test-results
   cachix:
