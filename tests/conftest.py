@@ -1,11 +1,10 @@
-import pytest
 import subprocess
 import os
 import time
 import sys
-import signal
 from contextlib import contextmanager
 
+import pytest
 import requests
 from requests.exceptions import Timeout, ConnectionError
 import selenium.webdriver
@@ -32,13 +31,16 @@ def service_endpoint():
 def service_process():
     '''Spin up and terminate the service.'''
 
+    sid = os.getsid(os.getpid())
+
     # spawn process with a new process group, so that it can be terminated by
     # itself
     with subprocess.Popen(SERVICE_BIN, preexec_fn=os.setsid) as process:
         try:
             yield process
         finally:
-            os.killpg(os.getpgid(process.pid), signal.SIGTERM)
+            if os.getsid(process.pid) != sid:
+                process.terminate()
 
 
 def retry_until_ok(url, retries=100):
