@@ -129,4 +129,7 @@ rec {
 
   postgrestToElm =
     (pkgs.callPackage deploy/postgrest-to-elm/default.nix {}).postgrestToElm;
+
+  autoformat =
+    pkgs.callPackage deploy/autoformat.nix { inherit md2sql sql2md checkedShellScript settings; };
 }
