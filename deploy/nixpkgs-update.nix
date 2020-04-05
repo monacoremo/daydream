@@ -2,7 +2,6 @@
 , jq
 , curl
 }:
-
 let
   refUrl =
     https://api.github.com/repos/nixos/nixpkgs/git/ref/heads/nixpkgs-unstable;
@@ -10,7 +9,7 @@ let
   githubV3Header =
     "Accept: application/vnd.github.v3+json";
 
-  tarballUrlBase=
+  tarballUrlBase =
     https://github.com/nixos/nixpkgs/archive/;
 in
 checkedShellScript "nixpkgs-update"

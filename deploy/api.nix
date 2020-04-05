@@ -4,7 +4,6 @@
 , postgrest
 , entr
 }:
-
 let
   postgrestConf =
     writeText "postgrest.conf"

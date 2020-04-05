@@ -9,7 +9,6 @@
 , postgrestToElm
 , writeText
 }:
-
 let
   binPrefix =
     "${settings.binPrefix}webapp-";
@@ -56,7 +55,7 @@ rec {
 
   generatePostgrestBindings =
     checkedShellScript "${binPrefix}postgrest-gen"
-    ''
+      ''
         gendir="$(realpath "${settings.webappDir}"/gen)"
         mkdir -p "$gendir"
         export LOCAL_DB_DIR="$gendir"

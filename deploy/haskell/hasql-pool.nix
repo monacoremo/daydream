@@ -1,4 +1,9 @@
-{ mkDerivation, base-prelude, hasql, hspec, resource-pool, stdenv
+{ mkDerivation
+, base-prelude
+, hasql
+, hspec
+, resource-pool
+, stdenv
 , time
 }:
 mkDerivation {

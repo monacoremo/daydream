@@ -1,7 +1,6 @@
 { lib
 , appName
 }:
-
 let
   prefix = "${lib.toUpper appName}_";
   dbPrefix = "${prefix}DB_";
@@ -52,4 +51,4 @@ let
     binPrefix = "${lib.toLower appName}-";
   };
 in
-  fixed // vals // { inherit vars; }
+fixed // vals // { inherit vars; }

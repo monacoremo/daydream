@@ -3,7 +3,6 @@
 , stdenv
 , shellcheck
 }:
-
 let
   writeBin =
     name: text:
@@ -28,16 +27,16 @@ let
           '';
       };
 in
-  name: text:
-    stdenv.mkDerivation rec {
-      inherit name;
+name: text:
+stdenv.mkDerivation rec {
+  inherit name;
 
-      bin = writeBin name text;
+  bin = writeBin name text;
 
-      phases = [ "installPhase" ];
+  phases = [ "installPhase" ];
 
-      installPhase =
-        ''
-          cp ${bin}/bin/${name} $out
-        '';
-    }
+  installPhase =
+    ''
+      cp ${bin}/bin/${name} $out
+    '';
+}

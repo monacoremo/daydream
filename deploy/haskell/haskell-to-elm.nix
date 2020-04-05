@@ -1,5 +1,15 @@
-{ mkDerivation, aeson, base, bound, elm-syntax, fetchgit
-, generics-sop, hpack, stdenv, text, time, unordered-containers
+{ mkDerivation
+, aeson
+, base
+, bound
+, elm-syntax
+, fetchgit
+, generics-sop
+, hpack
+, stdenv
+, text
+, time
+, unordered-containers
 }:
 mkDerivation {
   pname = "haskell-to-elm";
@@ -13,12 +23,24 @@ mkDerivation {
   isLibrary = true;
   isExecutable = true;
   libraryHaskellDepends = [
-    aeson base bound elm-syntax generics-sop text time
+    aeson
+    base
+    bound
+    elm-syntax
+    generics-sop
+    text
+    time
     unordered-containers
   ];
   libraryToolDepends = [ hpack ];
   testHaskellDepends = [
-    aeson base bound elm-syntax generics-sop text time
+    aeson
+    base
+    bound
+    elm-syntax
+    generics-sop
+    text
+    time
     unordered-containers
   ];
   prePatch = "hpack";

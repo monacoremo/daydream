@@ -3,7 +3,6 @@
 , settings
 , entr
 }:
-
 let
   binPrefix =
     "${settings.binPrefix}docs-";
@@ -21,6 +20,6 @@ rec {
   watch =
     checkedShellScript "${binPrefix}watch"
       ''
-       find "${settings.docsSrc}" | ${entr}/bin/entr -r ${build}
+        find "${settings.docsSrc}" | ${entr}/bin/entr -r ${build}
       '';
 }

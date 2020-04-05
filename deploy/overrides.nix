@@ -24,6 +24,6 @@ pkgs:
 
           configurator-pg =
             newPkgs.callPackage haskell/configurator-pg.nix {};
-      };
+        };
     };
 }

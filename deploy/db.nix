@@ -6,7 +6,6 @@
 , md2sql
 , gnused
 }:
-
 let
   postgresConf =
     writeText "postgresql.conf"

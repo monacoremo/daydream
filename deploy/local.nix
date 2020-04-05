@@ -12,7 +12,6 @@
 , docs
 , logmux
 }:
-
 let
   binPrefix =
     "${settings.binPrefix}local-";

@@ -1,6 +1,16 @@
-{ mkDerivation, aeson, base, bound, elm-syntax, fetchgit
-, haskell-to-elm, hpack, http-types, servant, servant-multipart
-, stdenv, text
+{ mkDerivation
+, aeson
+, base
+, bound
+, elm-syntax
+, fetchgit
+, haskell-to-elm
+, hpack
+, http-types
+, servant
+, servant-multipart
+, stdenv
+, text
 }:
 mkDerivation {
   pname = "servant-to-elm";
@@ -14,13 +24,27 @@ mkDerivation {
   isLibrary = true;
   isExecutable = true;
   libraryHaskellDepends = [
-    aeson base bound elm-syntax haskell-to-elm http-types servant
-    servant-multipart text
+    aeson
+    base
+    bound
+    elm-syntax
+    haskell-to-elm
+    http-types
+    servant
+    servant-multipart
+    text
   ];
   libraryToolDepends = [ hpack ];
   testHaskellDepends = [
-    aeson base bound elm-syntax haskell-to-elm http-types servant
-    servant-multipart text
+    aeson
+    base
+    bound
+    elm-syntax
+    haskell-to-elm
+    http-types
+    servant
+    servant-multipart
+    text
   ];
   prePatch = "hpack";
   homepage = "https://github.com/folq/servant-to-elm#readme";

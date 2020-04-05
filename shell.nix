@@ -7,13 +7,19 @@ let
   autoformat =
     project.checkedShellScript "autoformat"
       ''
+        echo "Formatting Python code..."
         ${pkgs.pythonPackages.autopep8}/bin/autopep8 -ri \
           "${project.settings.sourceDir}"/tests
 
+        echo "Formatting Elm code..."
         ${pkgs.elmPackages.elm-format}/bin/elm-format --yes \
           "${project.settings.sourceDir}"/webapp/src
 
+        echo "Formatting Haskell code..."
         find . -iname "*.hs" -exec ${pkgs.ormolu}/bin/ormolu --mode inplace {} +
+
+        echo "Formatting Nix code..."
+        ${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt "${project.settings.sourceDir}"
       '';
 in
 project.pkgs.mkShell {
@@ -42,18 +48,12 @@ project.pkgs.mkShell {
     project.docs.build.bin
     project.docs.watch.bin
     project.nixpkgsUpdate.bin
-    project.postgresql
-    project.postgrest
     project.python
     autoformat.bin
-    pkgs.bash
     pkgs.curl
-    pkgs.entr
     pkgs.elmPackages.elm
-    pkgs.elmPackages.elm-format
     pkgs.silver-searcher
     pkgs.cabal2nix
-    pkgs.ormolu
   ];
 
   shellHook = ''

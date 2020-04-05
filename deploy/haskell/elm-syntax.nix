@@ -1,5 +1,14 @@
-{ mkDerivation, base, bound, deriving-compat, fetchgit, hashable
-, hpack, prettyprinter, stdenv, text, unordered-containers
+{ mkDerivation
+, base
+, bound
+, deriving-compat
+, fetchgit
+, hashable
+, hpack
+, prettyprinter
+, stdenv
+, text
+, unordered-containers
 }:
 mkDerivation {
   pname = "elm-syntax";
@@ -11,12 +20,22 @@ mkDerivation {
     fetchSubmodules = true;
   };
   libraryHaskellDepends = [
-    base bound deriving-compat hashable prettyprinter text
+    base
+    bound
+    deriving-compat
+    hashable
+    prettyprinter
+    text
     unordered-containers
   ];
   libraryToolDepends = [ hpack ];
   testHaskellDepends = [
-    base bound deriving-compat hashable prettyprinter text
+    base
+    bound
+    deriving-compat
+    hashable
+    prettyprinter
+    text
     unordered-containers
   ];
   prePatch = "hpack";

@@ -25,10 +25,11 @@ rec {
 
   webapp =
     pkgs.callPackage deploy/webapp.nix
-    {
-      inherit settings events dbLocal dbLocalSettings deployLocal
-      checkedShellScript postgrestToElm;
-    };
+      {
+        inherit settings events dbLocal dbLocalSettings deployLocal
+          checkedShellScript postgrestToElm
+          ;
+      };
 
   docs =
     pkgs.callPackage deploy/docs.nix
@@ -70,27 +71,33 @@ rec {
       { inherit settings checkedShellScript python db api ingress webapp docs logmux; };
 
   postgresqlWithPerl =
-    pkgs.postgresql_12.overrideAttrs (attrs: {
-      configureFlags =
-        attrs.configureFlags ++ [ "--with-perl" ];
+    pkgs.postgresql_12.overrideAttrs (
+      attrs: {
+        configureFlags =
+          attrs.configureFlags ++ [ "--with-perl" ];
 
-      buildInputs =
-        attrs.buildInputs ++ [
-          (pkgs.perl.withPackages (ps: [ ps.EmailValid ]))
-        ];
-    });
+        buildInputs =
+          attrs.buildInputs ++ [
+            (pkgs.perl.withPackages (ps: [ ps.EmailValid ]))
+          ];
+      }
+    );
 
   postgresql =
     postgresqlWithPerl.withPackages
-      (ps: [
-        ps.pgtap
-      ]);
+      (
+        ps: [
+          ps.pgtap
+        ]
+      );
 
   python =
     pkgs.python38.withPackages
-      (ps: [
+      (
+        ps: [
           ps.click
-      ]);
+        ]
+      );
 
   postgrest =
     pkgs.haskellPackages.postgrest;

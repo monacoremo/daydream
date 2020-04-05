@@ -11,7 +11,6 @@
 , writeTextFile
 , checkedShellScript
 }:
-
 let
   nginxConf =
     writeNginxConf "nginx.conf"
@@ -150,12 +149,13 @@ let
           ''
             ${luajit}/bin/luajit -bl $out > /dev/null
           '';
-        };
+      };
 
   binPrefix =
     "${settings.binPrefix}ingress-";
 in
-{ run =
+{
+  run =
     checkedShellScript "${binPrefix}run"
       ''
         mkdir -p "${settings.ingressDir}"/{logs,conf}

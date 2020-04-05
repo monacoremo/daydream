@@ -7,15 +7,16 @@
 , firefox
 , geckodriver
 }:
-
 let
   testPython =
     python.withPackages
-      (ps: [
+      (
+        ps: [
           ps.pytest
           ps.requests
           ps.selenium
-      ]);
+        ]
+      );
 
   binPrefix =
     "${settings.binPrefix}tests-";
