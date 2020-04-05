@@ -15,17 +15,17 @@ PostgREST will log in as the `authenticator` role and switch to either the
 create role authenticator noinherit login;
 
 comment on role authenticator is 'Role that serves as an entry-point for API
-                       servers such as PostgREST.';
+                         servers such as PostgREST.';
 
 create role anonymous nologin noinherit;
 
 comment on role anonymous is 'The role that PostgREST will switch to when a
-                       user is not authenticated.';
+                         user is not authenticated.';
 
 create role webuser nologin noinherit;
 
 comment on role webuser is 'Role that PostgREST will switch to for
-                       authenticated web users.';
+                         authenticated web users.';
 
 ```
 
@@ -110,6 +110,6 @@ end;
 $$;
 
 comment on function tests.test_roles is 'Make sure that the roles are set up
-                       correctly.';
+                         correctly.';
 
 ```

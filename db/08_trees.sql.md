@@ -76,7 +76,7 @@ create type api.lineitem as (
 );
 
 comment on type api.lineitem is 'Line item, including its level and path in the
-                       tree of line items.';
+                         tree of line items.';
 
 ```
 
@@ -136,7 +136,7 @@ create function api.lineitem_subtrees (lineitem_id int)
 $$;
 
 comment on function api.lineitem_subtrees is 'Returns the tree of line items
-                       starting from a root node.';
+                         starting from a root node.';
 
 ```
 
@@ -180,7 +180,7 @@ end;
 $$;
 
 comment on function api.insert_lineitem_after is 'Insert a new line item as the
-                       first sibling after the given line item.';
+                         first sibling after the given line item.';
 
 ```
 
@@ -213,7 +213,7 @@ end;
 $$;
 
 comment on function api.insert_lineitem_first is 'Insert a new line item as the
-                       first child of another item.';
+                         first child of another item.';
 
 ```
 
@@ -277,7 +277,7 @@ create function api.delete_lineitem_subtrees (lineitem_id int)
 $$;
 
 comment on function api.delete_lineitem_subtrees is 'Delete the subtrees of the
-                       given line item.';
+                         given line item.';
 
 ```
 
@@ -297,7 +297,7 @@ select
 $$;
 
 comment on function api.delete_lineitem_including_subtrees is 'Delete the
-                       subtrees of the given line item and the given lineitem itself.';
+                         subtrees of the given line item and the given lineitem itself.';
 
 ```
 
@@ -368,7 +368,7 @@ end;
 $$;
 
 comment on function api.move_lineitem_after is 'Move a line item to be the
-                       first sibling after another.';
+                         first sibling after another.';
 
 ```
 
@@ -420,6 +420,6 @@ end;
 $$;
 
 comment on function api.move_lineitem_first is 'Move a line item to be the
-                       first child of another item.';
+                         first child of another item.';
 
 ```
