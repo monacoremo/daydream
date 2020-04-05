@@ -1,0 +1,22 @@
+#!/bin/sh
+
+set -eu
+
+rootdir="$(git rev-parse --show-toplevel)"
+
+files="$(git diff --cached --name-only)"
+
+if git rev-parse --verify HEAD >/dev/null 2>&1
+then
+	against=HEAD
+else
+	# Initial commit: diff against an empty tree object
+	against=$(git hash-object -t tree /dev/null)
+fi
+
+# Redirect output to stderr.
+exec 1>&2
+
+nix-shell --run autoformat
+
+echo "$files" | xargs git add
