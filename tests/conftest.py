@@ -11,8 +11,8 @@ from requests.exceptions import Timeout, ConnectionError
 import selenium.webdriver
 
 
-SERVICE_BIN = os.environ.get('TESTS_SERVICE_BIN')
-SERVICE_ENDPOINT = os.environ.get('TESTS_SERVICE_URI')
+SERVICE_BIN = os.environ['TESTS_SERVICE_BIN']
+SERVICE_ENDPOINT = os.environ['TESTS_SERVICE_URI']
 
 
 
@@ -66,6 +66,8 @@ def retry_until_ok(url, retries=100):
 
 @pytest.fixture(scope='session')
 def webdriver():
+    'Fixture for a selenium webdriver'
+
     options = selenium.webdriver.FirefoxOptions()
     options.headless = True
     driver = selenium.webdriver.Firefox(options=options)

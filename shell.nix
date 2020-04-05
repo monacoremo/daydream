@@ -27,11 +27,9 @@ project.pkgs.mkShell {
     project.docs.build.bin
     project.docs.watch.bin
     project.nixpkgsUpdate.bin
-    project.geckodriver
     project.postgresql
     project.postgrest
     project.python
-    project.firefox
     project.pkgs.bash
     project.pkgs.curl
     project.pkgs.entr

@@ -112,12 +112,6 @@ rec {
   md2sql =
     deploy/utils/md2sql.sed;
 
-  geckodriver =
-    pkgs.geckodriver;
-
-  firefox =
-    pkgs.firefox;
-
   events =
     (pkgs.callPackage events/default.nix {}).events;
 

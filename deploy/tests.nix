@@ -4,6 +4,8 @@
 , deployLocal
 , curl
 , entr
+, firefox
+, geckodriver
 }:
 
 let
@@ -22,14 +24,15 @@ rec {
   run =
     checkedShellScript "${binPrefix}run"
       ''
+        export PATH=${geckodriver}/bin:${firefox}/bin:"$PATH"
+
         ${testPython}/bin/py.test "${settings.sourceDir}"/tests "$@"
       '';
 
   runWithTmpEnv =
     checkedShellScript "${binPrefix}withtmpenv-run"
       ''
-        ${deployLocal.withTmpEnv} \
-          ${testPython}/bin/py.test "${settings.sourceDir}"/tests "$@"
+        ${deployLocal.withTmpEnv} ${run} "$@"
       '';
 
   watch =
