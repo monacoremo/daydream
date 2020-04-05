@@ -6,6 +6,14 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install Cachix
+          command: |
+            nix-env -iA cachix -f https://cachix.org/api/v1/install
+      - run:
+          name: Use Cachix
+          command: |
+            cachix use monacoremo
+      - run:
           name: Pre-load Nix environment
           command: |
             nix-shell --run "echo Loaded full stack Nix environment"
@@ -25,3 +33,16 @@ jobs:
               'su-exec user:user daydream-tests-run --junitxml=test-results/junit.xml"'
       - store_test_results:
           path: test-results
+  cachix:
+    docker:
+      - image: monacoremo/nix:2020-01-14-f9c81b5c-circleci
+    steps:
+      - checkout
+      - run:
+          name: Install Cachix
+          command: |
+            nix-env -iA cachix -f https://cachix.org/api/v1/install
+      - run:
+          name: Build and cache results on Cachix
+          command: |
+            nix-build | cachix push monacoremo
