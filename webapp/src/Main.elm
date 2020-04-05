@@ -86,13 +86,13 @@ update msg model =
 
 view : Model -> Browser.Document Msg
 view model =
-    { title = "Full stack"
+    { title = "Daydream - Login"
     , body =
         [ Element.layout
             [ Element.width Element.fill
             , Element.height Element.fill
             ]
-            (Element.text "test")
+            (Element.text "Login here...")
         ]
     }
 

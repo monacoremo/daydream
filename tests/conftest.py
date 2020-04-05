@@ -15,7 +15,9 @@ SERVICE_BIN = os.environ.get('TESTS_SERVICE_BIN')
 SERVICE_ENDPOINT = os.environ.get('TESTS_SERVICE_URI')
 
 
+
 # SERVICE
+
 
 @pytest.fixture(scope='session')
 def service_endpoint():
@@ -58,7 +60,9 @@ def retry_until_ok(url, retries=100):
     raise Timeout()
 
 
+
 # SELENIUM
+
 
 @pytest.fixture(scope='session')
 def webdriver():
@@ -70,3 +74,85 @@ def webdriver():
         yield driver
     finally:
         driver.quit()
+
+
+
+# ACCOUNTS AND SESSIONS
+
+
+@pytest.fixture(scope='session')
+def alice_email():
+    'Fixture for a user email.'
+    return f'alice-{time.time()}@test.org'
+
+
+@pytest.fixture(scope='session')
+def alice_password():
+    'Fixture for a user password.'
+    return 'alicesecret'
+
+
+@pytest.fixture(scope='session')
+def alice_account(service_endpoint, alice_email, alice_password):
+    'Fixture for a user account.'
+    session = requests.Session()
+    resp = session.post(f'{service_endpoint}/api/rpc/register', json={
+        'email': alice_email,
+        'name': 'Alice',
+        'password': alice_password,
+    })
+
+    assert resp.status_code == 200
+
+
+@pytest.fixture()
+def alice_session(service_endpoint, alice_email, alice_account, alice_password):
+    'Fixture for a logged in web session'
+    session = requests.Session()
+    resp = session.post(f'{service_endpoint}/api/rpc/login', json={
+        'email': alice_email,
+        'password': 'alicesecret',
+    })
+
+    assert resp.status_code == 200
+
+    return session
+
+
+@pytest.fixture(scope='session')
+def bob_email():
+    'Fixture for a user email.'
+    return f'bob-{time.time()}@test.org'
+
+
+@pytest.fixture(scope='session')
+def bob_password():
+    'Fixture for a user password.'
+    return 'bobsecret'
+
+
+@pytest.fixture(scope='session')
+def bob_account(service_endpoint, bob_email, bob_password):
+    'Fixture for a user account.'
+    session = requests.Session()
+    resp = session.post(f'{service_endpoint}/api/rpc/register', json={
+        'email': bob_email,
+        'name': 'Bob',
+        'password': bob_password,
+    })
+
+    assert resp.status_code == 200
+
+
+@pytest.fixture()
+def bob_session(service_endpoint, bob_email, bob_account, bob_password):
+    'Fixture for a logged in web session'
+    session = requests.Session()
+    resp = session.post(f'{service_endpoint}/api/rpc/login', json={
+        'email': bob_email,
+        'password': bob_password,
+    })
+
+    assert resp.status_code == 200
+
+    return session
