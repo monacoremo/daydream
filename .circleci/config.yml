@@ -31,7 +31,7 @@ jobs:
           name: Run tests for the basic application
           command: |
             nix-shell --run \
-              'su-exec user:user daydream-tests-run --junitxml=test-results/junit.xml"'
+              'su-exec user:user daydream-tests-run --junitxml=test-results/junit.xml'
       - store_test_results:
           path: test-results
   cachix:
@@ -43,6 +43,11 @@ jobs:
           name: Install Cachix
           command: |
             nix-env -iA cachix -f https://cachix.org/api/v1/install
+      - run:
+          name: Use Cachix
+          command: |
+            export USER=root
+            cachix use monacoremo
       - run:
           name: Build and cache results on Cachix
           command: |
