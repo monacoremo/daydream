@@ -12,6 +12,7 @@ jobs:
       - run:
           name: Use Cachix
           command: |
+            export USER=root
             cachix use monacoremo
       - run:
           name: Pre-load Nix environment
