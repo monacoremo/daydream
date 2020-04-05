@@ -38,7 +38,7 @@ def service_process():
         try:
             yield process
         finally:
-            process.terminate()
+            os.killpg(os.getpgid(process.pid), signal.SIGTERM)
 
 
 def retry_until_ok(url, retries=100):
