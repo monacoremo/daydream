@@ -1,4 +1,4 @@
-# Daydream
+# Daydream - Full stack in a nutshell
 
 > Work in progress
 
@@ -7,21 +7,21 @@
 This is an experiment on developing full stack application in a completely
 different way.
 
-* The core of the application is defined directly in
+- The core of the application is defined directly in
   [Postgres](https://www.postgresql.org/) using SQL, leveraging the power of
   Row Level Security and other features that the database offers
-* [PostgREST](http://postgrest.org/) is used to automatically derive a HTTP API
+- [PostgREST](http://postgrest.org/) is used to automatically derive a HTTP API
   from the Postgres application
-* All changes to the application state are tracked though an events service
+- All changes to the application state are tracked though an events service
   which is implemented in [Haskell](https://www.haskell.org/), leveraging the
   power of sum types to keep everything consistent
-* All APIs are tied together using [Openresty](https://openresty.org/) /
+- All APIs are tied together using [Openresty](https://openresty.org/) /
   [Nginx](https://www.nginx.com/) as a reverse HTTP proyx and Lua for
   middleware tasks
-* The frontend is written in [Elm](https://elm-lang.org/), with all API bindings
+- The frontend is written in [Elm](https://elm-lang.org/), with all API bindings
   generated from the Postgres application and events service
-* All dependencies and build steps are managed with [Nix](https://nixos.org/)
-* Tests are set up for all levels of the stack, including integration tests
+- All dependencies and build steps are managed with [Nix](https://nixos.org/)
+- Tests are set up for all levels of the stack, including integration tests
   written in Python and with Selenium
 
 ## Running the application
@@ -52,9 +52,9 @@ Haskell, Openresty/Nginx, Lua, Elm, Nix and Python, while optionally running
 everything locally without containers might need getting used to. But it has
 many upsides:
 
-* **Less work and repetition:** Almost all the APIs and frontend bindings are
+- **Less work and repetition:** Almost all the APIs and frontend bindings are
   generated from the database schema
-* **High reliability:** All dependencies kept consistent with Nix. The integrity
+- **High reliability:** All dependencies kept consistent with Nix. The integrity
   of the application state is maintained directly at the core in the database,
   avoiding whole classes of bugs
-* ...more fun! :-)
+- ...more fun! :-)

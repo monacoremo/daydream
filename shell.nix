@@ -25,7 +25,7 @@ let
         find "${project.settings.sourceDir}" -iname "*.sql.md" -exec ${autoformatMdSql} {} \;
 
         echo "Formatting Markdown files..."
-        prettier --write "${project.settings.sourceDir}"/db/*.md
+        ${prettier}/bin/prettier --write "${project.settings.sourceDir}/**/*.md"
       '';
 
   autoformatMdSql =
