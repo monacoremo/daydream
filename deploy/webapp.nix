@@ -7,55 +7,66 @@
 , deployLocal
 , checkedShellScript
 , postgrestToElm
+, writeText
 }:
 
 let
   binPrefix =
     "${settings.binPrefix}webapp-";
+
+  index =
+    writeText "index.html"
+      ''
+        <!doctype html>
+        <meta charset="utf-8">
+        <title>${settings.appName}</title>
+        <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+        <script src="/app/app.js"></script>
+      '';
+
+  init =
+    writeText "init.js"
+      ''
+        window.addEventListener('load', function() {
+            const app = Elm.Main.init();
+        });
+      '';
 in
 rec {
   build =
     checkedShellScript "${binPrefix}build"
       ''
-        srcdir="${settings.webappSrc}"
-        workdir="${settings.webappDir}"
-        webroot="${settings.webappWebroot}"
-
-        mkdir -p "$workdir" "$webroot"
-        ln -sf "$srcdir"/{elm.json,src} "$workdir"
-        ln -sf "$srcdir"/index.html "$webroot"/index.html
+        mkdir -p "${settings.webappDir}" "${settings.webappWebroot}"
+        ln -sf "${settings.webappSrc}"/{elm.json,src} "${settings.webappDir}"
+        ln -sf "${index}" "${settings.webappWebroot}"/index.html
 
         echo "Generating Elm bindings..."
-        ${events}/bin/elmgen --target-directory "$workdir/src"
+        ${events}/bin/elmgen --target-directory "${settings.webappDir}/src"
         ${generatePostgrestBindings}
-        ${elmPackages.elm-format}/bin/elm-format "$workdir/src/Api" --yes
+        ${elmPackages.elm-format}/bin/elm-format "${settings.webappDir}/src/Api" --yes
 
         echo "Building..."
-        cd "$workdir"
-
+        cd "${settings.webappDir}"
         ${elmPackages.elm}/bin/elm make src/Main.elm \
-          --output "$workdir"/app.js --debug
+          --output "${settings.webappDir}"/app.js --debug
 
-        cat "$srcdir"/init.js >> "$workdir"/app.js
-        cp "$workdir"/app.js "$webroot"/app.js
+        cat "${init}" >> "${settings.webappDir}"/app.js
+        cp "${settings.webappDir}"/app.js "${settings.webappWebroot}"/app.js
       '';
 
   generatePostgrestBindings =
     checkedShellScript "${binPrefix}postgrest-gen"
     ''
-        targetdir="${settings.webappDir}"/src
-        dbdir="$(realpath "${settings.webappDir}"/db)"
-
-        mkdir -p "$dbdir"
-
-        export LOCAL_DB_DIR="$dbdir"
+        gendir="$(realpath "${settings.webappDir}"/gen)"
+        mkdir -p "$gendir"
+        export LOCAL_DB_DIR="$gendir"
 
         ${dbLocal.setup} > /dev/null
         ${dbLocal.startDaemon} > /dev/null
 
         ${postgrestToElm}/bin/postgrest-to-elm \
           --db-uri "${dbLocalSettings.dbApiserverURI}" --role webuser --schema api \
-          --target-directory "$targetdir"
+          --target-directory "${settings.webappDir}/src"
 
         ${dbLocal.stopDaemon} > /dev/null
       '';
