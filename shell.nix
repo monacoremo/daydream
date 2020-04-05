@@ -22,6 +22,7 @@ project.pkgs.mkShell {
     project.webapp.watch.bin
     project.webapp.generatePostgrestBindings.bin
     project.tests.run.bin
+    project.tests.runWithTmpEnv.bin
     project.tests.watch.bin
     project.docs.build.bin
     project.docs.watch.bin
@@ -45,6 +46,12 @@ project.pkgs.mkShell {
     source "$(${project.deployLocal.mkEnv} . "$tmpdir")"
     trap 'rm -rf $tmpdir' exit
     echo "Environment for ${project.settings.appName} set up in $tmpdir"
+
+    # psql variables for convenience
+    export PGHOST="${project.settings.dbHost}"
+    export PGDATABASE="${project.settings.dbName}"
+    export PGUSER="${project.settings.dbSuperuser}"
+    export PGPASSWORD="${project.settings.dbSuperuserPassword}"
 
     # disable line wrap in psql
     export PAGER="less -S"

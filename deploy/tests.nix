@@ -25,6 +25,13 @@ rec {
         ${testPython}/bin/py.test "${settings.sourceDir}"/tests "$@"
       '';
 
+  runWithTmpEnv =
+    checkedShellScript "${binPrefix}withtmpenv-run"
+      ''
+        ${deployLocal.withTmpEnv} \
+          ${testPython}/bin/py.test "${settings.sourceDir}"/tests "$@"
+      '';
+
   watch =
     checkedShellScript "${binPrefix}watch"
       ''

@@ -133,12 +133,6 @@ rec {
         export TESTS_DB_URI="\${settings.dbSuperuserURI}"
         export TESTS_DBTEST_BIN="${db.test}"
 
-        # psql variables for convenience
-        export PGHOST="\${settings.dbHost}"
-        export PGDATABASE="\${settings.dbName}"
-        export PGUSER="\${settings.dbSuperuser}"
-        export PGPASSWORD="\${settings.dbSuperuserPassword}"
-
         EOF
 
         ${stdenv.shell} -n "$envfile"
