@@ -1,4 +1,4 @@
-{ pythonPackages
+{ python
 , checkedShellScript
 , settings
 , entr
@@ -8,7 +8,7 @@ let
     "${settings.binPrefix}docs-";
 
   sphinx =
-    pythonPackages.sphinx;
+    python.withPackages (ps: [ ps.sphinx ]);
 in
 rec {
   build =

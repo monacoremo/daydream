@@ -33,7 +33,7 @@ rec {
 
   docs =
     pkgs.callPackage deploy/docs.nix
-      { inherit settings checkedShellScript; };
+      { inherit settings checkedShellScript python; };
 
   ingress =
     pkgs.callPackage deploy/ingress.nix
@@ -131,5 +131,6 @@ rec {
     (pkgs.callPackage deploy/postgrest-to-elm/default.nix {}).postgrestToElm;
 
   autoformat =
-    pkgs.callPackage deploy/autoformat.nix { inherit md2sql sql2md checkedShellScript settings; };
+    pkgs.callPackage deploy/autoformat.nix
+      { inherit md2sql sql2md checkedShellScript settings; };
 }
