@@ -16,7 +16,8 @@ let
           "${project.settings.sourceDir}"/webapp/src
 
         echo "Formatting Haskell code..."
-        find . -iname "*.hs" -exec ${pkgs.ormolu}/bin/ormolu --mode inplace {} +
+        find "${project.settings.sourceDir}" -iname "*.hs" \
+          -exec ${pkgs.ormolu}/bin/ormolu --mode inplace {} +
 
         echo "Formatting Nix code..."
         ${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt "${project.settings.sourceDir}"
