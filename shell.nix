@@ -1,5 +1,20 @@
 let
   project = import ./default.nix;
+
+  pkgs =
+    project.pkgs;
+
+  autoformat =
+    project.checkedShellScript "autoformat"
+      ''
+        ${pkgs.pythonPackages.autopep8}/bin/autopep8 -ri \
+          "${project.settings.sourceDir}"/tests
+
+        ${pkgs.elmPackages.elm-format}/bin/elm-format --yes \
+          "${project.settings.sourceDir}"/webapp/src
+
+        find . -iname "*.hs" -exec ${pkgs.ormolu}/bin/ormolu --mode inplace {} +
+      '';
 in
 project.pkgs.mkShell {
   name = "${project.settings.appName}-env";
@@ -30,14 +45,15 @@ project.pkgs.mkShell {
     project.postgresql
     project.postgrest
     project.python
-    project.pkgs.bash
-    project.pkgs.curl
-    project.pkgs.entr
-    project.pkgs.elmPackages.elm
-    project.pkgs.elmPackages.elm-format
-    project.pkgs.silver-searcher
-    project.pkgs.cabal2nix
-    project.pkgs.pythonPackages.autopep8
+    autoformat.bin
+    pkgs.bash
+    pkgs.curl
+    pkgs.entr
+    pkgs.elmPackages.elm
+    pkgs.elmPackages.elm-format
+    pkgs.silver-searcher
+    pkgs.cabal2nix
+    pkgs.ormolu
   ];
 
   shellHook = ''
