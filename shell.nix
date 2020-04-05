@@ -7,6 +7,8 @@ let
   autoformat =
     project.checkedShellScript "autoformat"
       ''
+        exec 1>/dev/null 2>/dev/null
+
         echo "Formatting Python code..."
         ${black}/bin/black "${project.settings.sourceDir}"/tests
 
