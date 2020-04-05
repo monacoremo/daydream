@@ -17,7 +17,7 @@ jobs:
       - run:
           name: Pre-load Nix environment
           command: |
-            nix-shell --run "echo Loaded full stack Nix environment"
+            nix-shell --run "echo Loaded Nix environment"
       - run:
           name: Set up the test result directory structure
           command: mkdir -p test-results
@@ -28,10 +28,10 @@ jobs:
             chown -R user:user /root/project
             chmod o+xr /root /root/project
       - run:
-          name: Run tests for the basic application
+          name: Run tests
           command: |
             nix-shell --run \
-              'su-exec user:user daydream-tests-run --junitxml=test-results/junit.xml'
+              'su-exec user:user daydream-local-withtmpenv daydream-tests-run --junitxml=test-results/junit.xml'
       - store_test_results:
           path: test-results
   cachix:
