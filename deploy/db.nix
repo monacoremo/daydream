@@ -4,6 +4,7 @@
 , postgresql
 , entr
 , md2sql
+, gnused
 }:
 
 let
@@ -69,7 +70,7 @@ rec {
         for f in "${settings.dbSrc}"/*.sql.md; do
           filename=$(basename -- "$f")
           targetpath="${settings.dbDir}/$filename.sql"
-          sed -f ${md2sql} <"$f" >"$targetpath"
+          ${gnused}/bin/sed -f ${md2sql} <"$f" >"$targetpath"
           ${postgresql}/bin/psql "${settings.dbSetupURI}" -X -1 -f "$targetpath"
         done
 
