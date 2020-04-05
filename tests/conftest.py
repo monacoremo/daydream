@@ -11,25 +11,25 @@ from requests.exceptions import Timeout, ConnectionError
 import selenium.webdriver
 
 
-SERVICE_BIN = os.environ['TESTS_SERVICE_BIN']
-SERVICE_ENDPOINT = os.environ['TESTS_SERVICE_URI']
+SERVICE_BIN = os.environ["TESTS_SERVICE_BIN"]
+SERVICE_ENDPOINT = os.environ["TESTS_SERVICE_URI"]
 
 
 # SERVICE
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def service_endpoint():
-    '''Service endpoint that is ready for requests.'''
+    """Service endpoint that is ready for requests."""
 
     with service_process():
-        retry_until_ok(f'{SERVICE_ENDPOINT}/healthcheck')
+        retry_until_ok(f"{SERVICE_ENDPOINT}/healthcheck")
         yield SERVICE_ENDPOINT
 
 
 @contextmanager
 def service_process():
-    '''Spin up and terminate the service.'''
+    """Spin up and terminate the service."""
 
     os.setsid()
 
@@ -44,7 +44,7 @@ def service_process():
 
 
 def retry_until_ok(url, retries=100):
-    '''Retry a URL with HTTP GET requests until it returns '200 OK'.'''
+    """Retry a URL with HTTP GET requests until it returns '200 OK'."""
 
     for _ in range(retries):
         try:
@@ -65,9 +65,9 @@ def retry_until_ok(url, retries=100):
 # SELENIUM
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def webdriver():
-    'Fixture for a selenium webdriver'
+    "Fixture for a selenium webdriver"
 
     options = selenium.webdriver.FirefoxOptions()
     options.headless = True
@@ -82,78 +82,76 @@ def webdriver():
 # ACCOUNTS AND SESSIONS
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def alice_email():
-    'Fixture for a user email.'
-    return f'alice-{time.time()}@test.org'
+    "Fixture for a user email."
+    return f"alice-{time.time()}@test.org"
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def alice_password():
-    'Fixture for a user password.'
-    return 'alicesecret'
+    "Fixture for a user password."
+    return "alicesecret"
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def alice_account(service_endpoint, alice_email, alice_password):
-    'Fixture for a user account.'
+    "Fixture for a user account."
     session = requests.Session()
-    resp = session.post(f'{service_endpoint}/api/rpc/register', json={
-        'email': alice_email,
-        'name': 'Alice',
-        'password': alice_password,
-    })
+    resp = session.post(
+        f"{service_endpoint}/api/rpc/register",
+        json={"email": alice_email, "name": "Alice", "password": alice_password,},
+    )
 
     assert resp.status_code == 200
 
 
 @pytest.fixture()
 def alice_session(service_endpoint, alice_email, alice_account, alice_password):
-    'Fixture for a logged in web session'
+    "Fixture for a logged in web session"
     session = requests.Session()
-    resp = session.post(f'{service_endpoint}/api/rpc/login', json={
-        'email': alice_email,
-        'password': 'alicesecret',
-    })
+    resp = session.post(
+        f"{service_endpoint}/api/rpc/login",
+        json={"email": alice_email, "password": "alicesecret",},
+    )
 
     assert resp.status_code == 200
 
     return session
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def bob_email():
-    'Fixture for a user email.'
-    return f'bob-{time.time()}@test.org'
+    "Fixture for a user email."
+    return f"bob-{time.time()}@test.org"
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def bob_password():
-    'Fixture for a user password.'
-    return 'bobsecret'
+    "Fixture for a user password."
+    return "bobsecret"
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def bob_account(service_endpoint, bob_email, bob_password):
-    'Fixture for a user account.'
+    "Fixture for a user account."
     session = requests.Session()
-    resp = session.post(f'{service_endpoint}/api/rpc/register', json={
-        'email': bob_email,
-        'name': 'Bob',
-        'password': bob_password,
-    })
+    resp = session.post(
+        f"{service_endpoint}/api/rpc/register",
+        json={"email": bob_email, "name": "Bob", "password": bob_password,},
+    )
 
     assert resp.status_code == 200
 
 
 @pytest.fixture()
 def bob_session(service_endpoint, bob_email, bob_account, bob_password):
-    'Fixture for a logged in web session'
+    "Fixture for a logged in web session"
     session = requests.Session()
-    resp = session.post(f'{service_endpoint}/api/rpc/login', json={
-        'email': bob_email,
-        'password': bob_password,
-    })
+    resp = session.post(
+        f"{service_endpoint}/api/rpc/login",
+        json={"email": bob_email, "password": bob_password,},
+    )
 
     assert resp.status_code == 200
 

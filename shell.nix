@@ -8,8 +8,7 @@ let
     project.checkedShellScript "autoformat"
       ''
         echo "Formatting Python code..."
-        ${pkgs.pythonPackages.autopep8}/bin/autopep8 -ri \
-          "${project.settings.sourceDir}"/tests
+        ${black}/bin/black "${project.settings.sourceDir}"/tests
 
         echo "Formatting Elm code..."
         ${pkgs.elmPackages.elm-format}/bin/elm-format --yes \
@@ -22,6 +21,9 @@ let
         echo "Formatting Nix code..."
         ${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt "${project.settings.sourceDir}"
       '';
+
+  black =
+    pkgs.python3.withPackages (ps: [ ps.black ]);
 in
 project.pkgs.mkShell {
   name = "${project.settings.appName}-env";

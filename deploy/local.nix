@@ -126,10 +126,8 @@ rec {
         export ${settings.vars.docsSrc}="\${settings.sourceDir}/docs"
         export ${settings.vars.docsDir}="\${settings.dir}/docs"
 
-        # testings variables
         export TESTS_SERVICE_BIN="${run}"
         export TESTS_SERVICE_URI="\${settings.URI}"
-        export TESTS_DB_URI="\${settings.dbSuperuserURI}"
         export TESTS_DBTEST_BIN="${db.test}"
 
         EOF
