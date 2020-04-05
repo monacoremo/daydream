@@ -32,6 +32,8 @@ def service_endpoint():
 def service_process():
     '''Spin up and terminate the service.'''
 
+    os.setsid()
+
     # spawn process with a new process group, so that it can be terminated by
     # itself
     process = subprocess.Popen(SERVICE_BIN, preexec_fn=os.setsid)
