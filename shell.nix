@@ -20,6 +20,21 @@ let
 
         echo "Formatting Nix code..."
         ${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt "${project.settings.sourceDir}"
+
+        echo "Formatting SQL code embedded in Markdown files..."
+        find "${project.settings.sourceDir}" -iname "*.sql.md" \
+          -exec ${autoformatMdSql} {} +
+      '';
+
+  autoformatMdSql =
+    project.checkedShellScript "autoformat-md-sql"
+      ''
+        tmpfile="$(mktemp)"
+        ${pkgs.gnused}/bin/sed -f ${project.md2sql} < "$1" \
+          | ${pkgs.pgformatter}/bin/pg_format -u 1 -w 80 \
+          | ${pkgs.gnused}/bin/sed -f ${project.sql2md} > "$tmpfile"
+
+        mv "$tmpfile" "$1"
       '';
 
   black =
@@ -57,6 +72,7 @@ project.pkgs.mkShell {
     pkgs.elmPackages.elm
     pkgs.silver-searcher
     pkgs.cabal2nix
+    pkgs.pgformatter
   ];
 
   shellHook = ''

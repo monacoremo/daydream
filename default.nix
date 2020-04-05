@@ -63,7 +63,9 @@ rec {
       dbSrc = settings.dbSrc;
       dbSetupURI = "postgres:///postgres?host=${dbSetupHost}&user=postgres&password=postgres";
       dbApiserverPassword = "localpw";
-      dbApiserverURI = "postgres:///postgres?host=${dbHost}&user=authenticator&password=${dbApiserverPassword}";
+      dbApiserverURI =
+        "postgres:///postgres?host=${dbHost}" +
+        "&user=authenticator&password=${dbApiserverPassword}";
     };
 
   deployLocal =
@@ -118,6 +120,9 @@ rec {
 
   md2sql =
     deploy/utils/md2sql.sed;
+
+  sql2md =
+    deploy/utils/sql2md.sed;
 
   events =
     (pkgs.callPackage events/default.nix {}).events;
