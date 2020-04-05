@@ -21,11 +21,11 @@ let
         echo "Formatting Nix code..."
         ${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt "${project.settings.sourceDir}"
 
-        echo "Formatting SQL code embedded in Markdown files..."
-        find "${project.settings.sourceDir}" -iname "*.sql.md" -exec ${autoformatMdSql} {} \;
-
         echo "Formatting Markdown files..."
         ${prettier}/bin/prettier --write "${project.settings.sourceDir}/**/*.md"
+
+        echo "Formatting SQL code embedded in Markdown files..."
+        find "${project.settings.sourceDir}" -iname "*.sql.md" -exec ${autoformatMdSql} {} \;
       '';
 
   autoformatMdSql =
