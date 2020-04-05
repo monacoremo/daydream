@@ -7,22 +7,20 @@ Security mechanisms, we want to make the items visible to their owner and, if
 they are set as public, to anyone.
 
 ```sql
-create table app.todos
-    ( todo_id       bigserial primary key
-    , user_id       bigint references app.users
-    , description   text not null
-    , created       timestamptz not null default clock_timestamp()
-    , done          bool not null default false
-    , public        bool not null default false
+create table app.todos (
+    todo_id bigserial primary key,
+    user_id bigint references app.users,
+    description text not null,
+    created timestamptz not null default clock_timestamp(),
+    done bool not null default false,
+    public bool not null default false,
+    unique (user_id, description)
+);
 
-    , unique (user_id, description)
-    );
+comment on table app.todos is 'Todo items that can optionally be set to public.';
 
-comment on table app.todos is
-    'Todo items that can optionally be set to public.';
-
-comment on column app.todos.public is
-    'Todo item will be visible to all users if public.';
+comment on column app.todos.public is 'Todo item will be visible to all users
+       if public.';
 
 ```
 
@@ -32,13 +30,8 @@ with a specific title.
 Our API will get access to the `app.todo` table:
 
 ```sql
-grant
-        select,
-        insert(user_id, description, public),
-        update(description, done, public),
-        delete
-    on table app.todos
-    to api;
+grant select, insert (user_id, description, public), update (description, done,
+    public), delete on table app.todos to api;
 
 ```
 
@@ -84,42 +77,28 @@ PostgreSQL will make sure that our policies are consistently applied in all
 cases, e.g. when performing joins of embeds. This would be very challenging to
 implement reliably outside the database.
 
-
 ### Access to `app.todos`
 
 Users should be able to read todo items that they own or that are public.
 They should only be able to write their own todo items.
 
 ```sql
-create policy webuser_read_todo
-    on app.todos
-    for select
-    using (
-        current_setting('role') = 'webuser'
-        and (
-            public
-            or user_id = app.current_user_id()
-        )
-    );
+create policy webuser_read_todo on app.todos for select using
+    (current_setting('role') = 'webuser'
+    and (public or user_id = app.current_user_id ()));
 
-create policy webuser_write_todo
-    on app.todos
-    for all
-    using (
-        current_setting('role') = 'webuser'
-        and user_id = app.current_user_id()
-    );
+create policy webuser_write_todo on app.todos for all using
+    (current_setting('role') = 'webuser'
+    and user_id = app.current_user_id ());
 
 ```
 
 ## API
 
-
 ```sql
 set role api;
 
 ```
-
 
 ### Todos API endpoint
 
@@ -127,18 +106,17 @@ We will expose the todo items through a view:
 
 ```sql
 create view api.todos as
-    select
-        todo_id,
-        user_id,
-        description,
-        public,
-        created,
-        done
-    from
-        app.todos;
+select
+    todo_id,
+    user_id,
+    description,
+    public,
+    created,
+    done
+from
+    app.todos;
 
-comment on view api.todos is
-    'Todo items that can optionally be set to be public.';
+comment on view api.todos is 'Todo items that can optionally be set to be public.';
 
 ```
 
@@ -146,12 +124,7 @@ Web-users should be able to view, create, update and delete todo items, with the
 restrictions that we previously set in the Row Level Security policies.
 
 ```sql
-grant
-        select,
-        insert,
-        update(description, public, done),
-        delete
-    on api.todos
+grant select, insert, update (description, public, done), delete on api.todos
     to webuser;
 
 ```

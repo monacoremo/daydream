@@ -7,24 +7,21 @@ to keep track of the line item that each line item belongs to (the parent) and
 the order of the line items that all have the same parent (siblings).
 
 ```sql
-create table app.lineitems
-    ( lineitem_id   serial primary key
-    , parent_id     int references app.lineitems(lineitem_id)
-    , position      int not null
-    , label         text not null
+create table app.lineitems (
+    lineitem_id serial primary key,
+    parent_id int references app.lineitems (lineitem_id),
+    position int not null,
+    label text not null,
+    constraint valid_lineitem_parent check (lineitem_id != parent_id),
+    constraint valid_lineitem_position check (position >= 0),
+    constraint unique_lineitem_position unique (parent_id, position) deferrable
+	initially immediate
+);
 
-    , constraint valid_lineitem_parent check (lineitem_id != parent_id)
-    , constraint valid_lineitem_position check (position >= 0)
-    , constraint unique_lineitem_position
-        unique (parent_id, position)
-        deferrable initially immediate
-    );
+comment on table app.lineitems is 'Financial statements line items.';
 
-comment on table app.lineitems is
-    'Financial statements line items.';
+comment on column app.lineitems.position is 'Position of the item among its siblings.';
 
-comment on column app.lineitems.position is
-    'Position of the item among its siblings.';
 ```
 
 Based on the contraints that we set up on our new table, only valid ordered
@@ -69,17 +66,18 @@ Let's create a new type to represent line items and their position in the
 hierarchy:
 
 ```sql
-create type api.lineitem as
-    ( lineitem_id int
-    , parent_id int
-    , number bigint
-    , label text
-    , level_ int
-    , path_ integer[]
-    );
+create type api.lineitem as (
+    lineitem_id int,
+    parent_id int,
+    number bigint,
+    label text,
+    level_ int,
+    path_ integer[]
+);
 
-comment on type api.lineitem is
-    'Line item, including its level and path in the tree of line items.';
+comment on type api.lineitem is 'Line item, including its level and path in the
+       tree of line items.';
+
 ```
 
 The `path` will be used as an array of positions, which can be useful to
@@ -92,49 +90,54 @@ use a recursive `with`-query (or Common Table Expression) to select all those
 items for a given parent.
 
 ```sql
-create function api.lineitem_subtrees(lineitem_id int)
+create function api.lineitem_subtrees (lineitem_id int)
     returns setof api.lineitem
     language sql
     as $$
-        with recursive
-            items as (
-                select
-                        lineitem_id,
-                        parent_id,
-                        position,
-                        label,
-                        1 level_,
-                        array[]::integer[] path_
-                    from app.lineitems lineitems
-                    where lineitems.lineitem_id = lineitem_subtrees.lineitem_id
-                union all
-                    select
-                            children.lineitem_id,
-                            children.parent_id,
-                            children.position,
-                            children.label,
-                            items.level_ + 1 level_,
-                            items.path_ || children.position path_
-                        from items, app.lineitems children
-                        where items.lineitem_id = children.parent_id
-            )
-            select
-                    lineitem_id,
-                    parent_id,
-                    row_number() over (
-                        partition by parent_id
-                        order by position
-                    ),
-                    label,
-                    level_,
-                    path_
-                from items
-                where items.lineitem_id != lineitem_subtrees.lineitem_id
-                order by path_
-    $$;
+    with recursive items as (
+        select
+            lineitem_id,
+            parent_id,
+            position,
+            label,
+            1 level_,
+            array[]::integer[] path_
+        from
+            app.lineitems lineitems
+        where
+            lineitems.lineitem_id = lineitem_subtrees.lineitem_id
+        union all
+        select
+            children.lineitem_id,
+            children.parent_id,
+            children.position,
+            children.label,
+            items.level_ + 1 level_,
+            items.path_ || children.position path_
+        from
+            items,
+            app.lineitems children
+        where
+            items.lineitem_id = children.parent_id
+)
+    select
+        lineitem_id,
+        parent_id,
+        row_number() over (partition by parent_id order by position),
+        label,
+        level_,
+        path_
+    from
+        items
+    where
+        items.lineitem_id != lineitem_subtrees.lineitem_id
+    order by
+        path_
+$$;
 
-comment on function api.lineitem_subtrees is
-    'Returns the tree of line items starting from a root node.';
+comment on function api.lineitem_subtrees is 'Returns the tree of line items
+       starting from a root node.';
+
 ```
 
 ### Creating new line items
@@ -142,73 +145,76 @@ comment on function api.lineitem_subtrees is
 #### Inserting new line items as the first sibling after an existing line item
 
 ```sql
-create function api.insert_lineitem_after(lineitem_id int, label text)
+create function api.insert_lineitem_after (lineitem_id int, label text)
     returns int
     language plpgsql
     as $$
-        declare
-            target app.lineitems;
-            new_lineitem_id int;
-        begin
-            -- find the item that the new item should be inserted after
-            select * from app.lineitems lineitems
-                where lineitems.lineitem_id = insert_lineitem_after.lineitem_id
-                into strict target;
+declare
+    target app.lineitems;
+    new_lineitem_id int;
+begin
+    -- find the item that the new item should be inserted after
+    select
+        *
+    from
+        app.lineitems lineitems
+    where
+        lineitems.lineitem_id = insert_lineitem_after.lineitem_id into strict target;
+    -- make room for our new item
+    set constraints unique_lineitem_position deferred;
+    update
+        app.lineitems
+    set
+        position = position + 1
+    where
+        parent_id = target.parent_id
+        and position > target.position;
+    set constraints unique_lineitem_position immediate;
+    -- insert our new item
+    insert into app.lineitems (parent_id, position, label)
+        values (target.parent_id, target.position + 1, insert_lineitem_after.label)
+    returning
+        lineitems.lineitem_id into new_lineitem_id;
+    return new_lineitem_id;
+end;
+$$;
 
-            -- make room for our new item
-            set constraints unique_lineitem_position deferred;
+comment on function api.insert_lineitem_after is 'Insert a new line item as the
+       first sibling after the given line item.';
 
-            update app.lineitems set position = position + 1
-                where
-                    parent_id = target.parent_id
-                    and position > target.position;
-
-            set constraints unique_lineitem_position immediate;
-
-            -- insert our new item
-            insert into app.lineitems(parent_id, position, label)
-                values (target.parent_id, target.position + 1, insert_lineitem_after.label)
-                returning lineitems.lineitem_id
-                into new_lineitem_id;
-
-            return new_lineitem_id;
-        end;
-    $$;
-
-comment on function api.insert_lineitem_after is
-    'Insert a new line item as the first sibling after the given line item.';
 ```
 
 #### Inserting new line items as the first child of a line item
 
 ```sql
-create function api.insert_lineitem_first(parent_id int, label text)
+create function api.insert_lineitem_first (parent_id int, label text)
     returns int
     language plpgsql
     as $$
-        declare
-            new_lineitem_id int;
-        begin
-            -- make room for the new item
-            set constraints unique_lineitem_position deferred;
+declare
+    new_lineitem_id int;
+begin
+    -- make room for the new item
+    set constraints unique_lineitem_position deferred;
+    update
+        lineitems
+    set
+        position = position + 1
+    where
+        lineitems.parent_id = insert_lineitem_first.parent_id;
+    set constraints unique_lineitem_position immediate;
+    -- insert the new item
+    insert into lineitems (parent_id, position, label)
+        values (insert_lineitem_first.parent_id, 0, insert_lineitem_first.label)
+    returning
+        lineitems.lineitem_id into new_lineitem_id;
+    return new_lineitem_id;
+end;
+$$;
 
-            update lineitems set position = position + 1
-                where
-                    lineitems.parent_id = insert_lineitem_first.parent_id;
+comment on function api.insert_lineitem_first is 'Insert a new line item as the
+       first child of another item.';
 
-            set constraints unique_lineitem_position immediate;
-
-            -- insert the new item
-            insert into lineitems(parent_id, position, label)
-                values (insert_lineitem_first.parent_id, 0, insert_lineitem_first.label)
-                returning lineitems.lineitem_id into new_lineitem_id;
-
-            return new_lineitem_id;
-        end;
-    $$;
-
-comment on function api.insert_lineitem_first is
-    'Insert a new line item as the first child of another item.';
 ```
 
 ### Deleting line items
@@ -216,36 +222,38 @@ comment on function api.insert_lineitem_first is
 #### Deleting a leaf line item and closing the hole it might have left behind
 
 ```sql
-create function api.delete_lineitem(lineitem_id int)
+create function api.delete_lineitem (lineitem_id int)
     returns void
     language plpgsql
     as $$
-        declare
-            target app.lineitems;
-        begin
-            -- find the item to be deleted
-            select * from app.lineitems lineitems
-                where lineitems.lineitem_id = delete_lineitem.lineitem_id
-                into strict target;
+declare
+    target app.lineitems;
+begin
+    -- find the item to be deleted
+    select
+        *
+    from
+        app.lineitems lineitems
+    where
+        lineitems.lineitem_id = delete_lineitem.lineitem_id into strict target;
+    -- delete the item
+    delete from app.lineitems lineitems
+    where lineitems.lineitem_id = delete_lineitem.lineitem_id;
+    -- close the hole left by the deleted item
+    set constraints unique_lineitem_position deferred;
+    update
+        app.lineitems
+    set
+        position = position - 1
+    where
+        parent_id = target.parent_id
+        and position > target.position;
+    set constraints unique_lineitem_position immediate;
+end;
+$$;
 
-            -- delete the item
-            delete from app.lineitems lineitems
-                where lineitems.lineitem_id = delete_lineitem.lineitem_id;
+comment on function api.delete_lineitem is 'Delete the given line item.';
 
-            -- close the hole left by the deleted item
-            set constraints unique_lineitem_position deferred;
-
-            update app.lineitems set position = position - 1
-                where
-                    parent_id = target.parent_id
-                    and position > target.position;
-
-            set constraints unique_lineitem_position immediate;
-        end;
-    $$;
-
-comment on function api.delete_lineitem is
-    'Delete the given line item.';
 ```
 
 This function will not work on any items that have any children, as our
@@ -256,34 +264,41 @@ destructive deletes and will define a separate function to implement it.
 #### Deleting the subtrees of a line item
 
 ```sql
-create function api.delete_lineitem_subtrees(lineitem_id int)
+create function api.delete_lineitem_subtrees (lineitem_id int)
     returns void
     language sql
     as $$
-        delete from app.lineitems
-            where lineitem_id in (
-                select lineitem_id
-                from lineitem_subtrees(delete_lineitem_subtrees.lineitem_id)
-            )
-    $$;
+    delete from app.lineitems
+    where lineitem_id in (
+            select
+                lineitem_id
+            from
+                lineitem_subtrees (delete_lineitem_subtrees.lineitem_id))
+$$;
 
-comment on function api.delete_lineitem_subtrees is
-    'Delete the subtrees of the given line item.';
+comment on function api.delete_lineitem_subtrees is 'Delete the subtrees of the
+       given line item.';
+
 ```
 
 #### Deleting a line item and its subtrees
 
 ```sql
-create function api.delete_lineitem_including_subtrees(lineitem_id int)
+create function api.delete_lineitem_including_subtrees (lineitem_id int)
     returns void
     language sql
     as $$
-        select delete_lineitem_subtrees(lineitem_id);
-        select delete_lineitem(lineitem_id);
-    $$;
+    select
+        delete_lineitem_subtrees (lineitem_id);
 
-comment on function api.delete_lineitem_including_subtrees is
-    'Delete the subtrees of the given line item and the given lineitem itself.';
+select
+    delete_lineitem (lineitem_id);
+
+$$;
+
+comment on function api.delete_lineitem_including_subtrees is 'Delete the
+       subtrees of the given line item and the given lineitem itself.';
+
 ```
 
 ### Moving line items
@@ -299,106 +314,112 @@ the following steps:
 3. Close the hole in the `position`s it might have left behind.
 
 ```sql
-create function api.move_lineitem_after(lineitem_id int, target_lineitem_id int)
+create function api.move_lineitem_after (lineitem_id int, target_lineitem_id int)
     returns void
     language plpgsql
     as $$
-        declare
-            item_to_move app.lineitems;
-            target app.lineitems;
-        begin
-            -- find the item that we want to move
-            select * from app.lineitems lineitems
-                where lineitems.lineitem_id = move_lineitem_after.lineitem_id
-                into strict item_to_move;
+declare
+    item_to_move app.lineitems;
+    target app.lineitems;
+begin
+    -- find the item that we want to move
+    select
+        *
+    from
+        app.lineitems lineitems
+    where
+        lineitems.lineitem_id = move_lineitem_after.lineitem_id into strict item_to_move;
+    -- find the item that we want to move our item after
+    select
+        *
+    from
+        app.lineitems lineitems
+    where
+        lineitems.lineitem_id = target_lineitem_id into strict target;
+    -- make room for the item to be moved
+    set constraints unique_lineitem_position deferred;
+    update
+        app.lineitems
+    set
+        position = position + 1
+    where
+        parent_id = target.parent_id
+        and position > target.position;
+    set constraints unique_lineitem_position immediate;
+    -- move the item
+    set constraints unique_lineitem_position deferred;
+    update
+        app.lineitems lineitems
+    set
+        position = target.position + 1,
+        parent_id = target.parent_id
+    where
+        lineitems.lineitem_id = move_lineitem_after.lineitem_id;
+    set constraints unique_lineitem_position immediate;
+    -- close the hole left by the moved item
+    update
+        app.lineitems
+    set
+        position = position - 1
+    where
+        parent_id = item_to_move.parent_id
+        and position > item_to_move.position;
+end;
+$$;
 
-            -- find the item that we want to move our item after
-            select * from app.lineitems lineitems
-                where lineitems.lineitem_id = target_lineitem_id
-                into strict target;
+comment on function api.move_lineitem_after is 'Move a line item to be the
+       first sibling after another.';
 
-            -- make room for the item to be moved
-            set constraints unique_lineitem_position deferred;
-
-            update app.lineitems set position = position + 1
-                where
-                    parent_id = target.parent_id
-                    and position > target.position;
-
-            set constraints unique_lineitem_position immediate;
-
-            -- move the item
-            set constraints unique_lineitem_position deferred;
-
-            update app.lineitems lineitems
-                set
-                    position = target.position + 1,
-                    parent_id = target.parent_id
-                where
-                    lineitems.lineitem_id = move_lineitem_after.lineitem_id;
-
-            set constraints unique_lineitem_position immediate;
-
-            -- close the hole left by the moved item
-            update app.lineitems set position = position - 1
-                where
-                    parent_id = item_to_move.parent_id
-                    and position > item_to_move.position;
-        end;
-    $$;
-
-comment on function api.move_lineitem_after is
-    'Move a line item to be the first sibling after another.';
 ```
 
 #### Moving a line item to be the first child of a parent line item
 
 ```sql
-create function api.move_lineitem_first(lineitem_id int, parent_id int)
+create function api.move_lineitem_first (lineitem_id int, parent_id int)
     returns void
     language plpgsql
     as $$
-        declare
-            item_to_move app.lineitems;
-        begin
-            -- find the item that we want to move
-            select * from app.lineitems lineitems
-                where lineitems.lineitem_id = move_lineitem_first.lineitem_id
-                into strict item_to_move;
+declare
+    item_to_move app.lineitems;
+begin
+    -- find the item that we want to move
+    select
+        *
+    from
+        app.lineitems lineitems
+    where
+        lineitems.lineitem_id = move_lineitem_first.lineitem_id into strict item_to_move;
+    -- make room for the item to be moved
+    set constraints unique_lineitem_position deferred;
+    update
+        app.lineitems lineitems
+    set
+        position = position + 1
+    where
+        lineitems.parent_id = move_lineitem_first.parent_id;
+    set constraints unique_lineitem_position immediate;
+    -- move the item
+    update
+        app.lineitems lineitems
+    set
+        position = 0,
+        parent_id = move_lineitem_first.parent_id
+    where
+        lineitems.lineitem_id = move_lineitem_first.lineitem_id;
+    -- close the hole left by the moved item
+    set constraints unique_lineitem_position deferred;
+    update
+        app.lineitems
+    set
+        position = position - 1
+    where
+        lineitems.parent_id = item_to_move.parent_id
+        and position > item_to_move.position;
+    set constraints unique_lineitem_position immediate;
+end;
+$$;
 
-            -- make room for the item to be moved
-            set constraints unique_lineitem_position deferred;
+comment on function api.move_lineitem_first is 'Move a line item to be the
+       first child of another item.';
 
-            update app.lineitems lineitems
-                set
-                    position = position + 1
-                where
-                    lineitems.parent_id = move_lineitem_first.parent_id;
-
-            set constraints unique_lineitem_position immediate;
-
-            -- move the item
-            update app.lineitems lineitems
-                set
-                    position = 0,
-                    parent_id = move_lineitem_first.parent_id
-                where
-                    lineitems.lineitem_id = move_lineitem_first.lineitem_id;
-
-            -- close the hole left by the moved item
-            set constraints unique_lineitem_position deferred;
-
-            update app.lineitems
-                set
-                    position = position - 1
-                where
-                    lineitems.parent_id = item_to_move.parent_id
-                    and position > item_to_move.position;
-
-            set constraints unique_lineitem_position immediate;
-        end;
-    $$;
-
-comment on function api.move_lineitem_first is
-    'Move a line item to be the first child of another item.';
 ```

@@ -64,8 +64,8 @@ rec {
       dbSetupURI = "postgres:///postgres?host=${dbSetupHost}&user=postgres&password=postgres";
       dbApiserverPassword = "localpw";
       dbApiserverURI =
-        "postgres:///postgres?host=${dbHost}" +
-        "&user=authenticator&password=${dbApiserverPassword}";
+        "postgres:///postgres?host=${dbHost}"
+        + "&user=authenticator&password=${dbApiserverPassword}";
     };
 
   deployLocal =

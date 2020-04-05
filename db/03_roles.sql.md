@@ -12,21 +12,20 @@ PostgREST will log in as the `authenticator` role and switch to either the
 
 ```sql
 \echo 'Setting up roles...'
-
 create role authenticator noinherit login;
 
-comment on role authenticator is
-    'Role that serves as an entry-point for API servers such as PostgREST.';
+comment on role authenticator is 'Role that serves as an entry-point for API
+       servers such as PostgREST.';
 
 create role anonymous nologin noinherit;
 
-comment on role anonymous is
-    'The role that PostgREST will switch to when a user is not authenticated.';
+comment on role anonymous is 'The role that PostgREST will switch to when a
+       user is not authenticated.';
 
 create role webuser nologin noinherit;
 
-comment on role webuser is
-    'Role that PostgREST will switch to for authenticated web users.';
+comment on role webuser is 'Role that PostgREST will switch to for
+       authenticated web users.';
 
 ```
 
@@ -59,13 +58,11 @@ tables, views and functions defined in them.
 ```sql
 create role auth nologin;
 
-comment on role auth is
-    'Role that owns the auth schema and its objects.';
+comment on role auth is 'Role that owns the auth schema and its objects.';
 
 create role api nologin;
 
-comment on role api is
-    'Role that owns the api schema and its objects.';
+comment on role api is 'Role that owns the api schema and its objects.';
 
 ```
 
@@ -84,8 +81,7 @@ alter default privileges revoke execute on functions from public;
 ```
 
 Now, for all functions created in this database by the superuser, permissions
-to execute functions have to be explicitly granted using `grant execute on
-function ...` statements.
+to execute functions have to be explicitly granted using `grant execute on function ...` statements.
 
 We also need to remove the default execute privileges from the `auth` and `api`
 roles, as the defaults apply per user.
@@ -101,17 +97,19 @@ The `authenticator` role needs to be granted the `anonymous` and `webuser`
 roles.
 
 ```sql
-create function tests.test_roles()
+create function tests.test_roles ()
     returns setof text
     language plpgsql
     as $$
-    begin
-        return next is_member_of('anonymous', ARRAY['authenticator']);
-        return next is_member_of('webuser', ARRAY['authenticator']);
-    end;
-    $$;
+begin
+    return next is_member_of ('anonymous',
+        array['authenticator']);
+    return next is_member_of ('webuser',
+        array['authenticator']);
+end;
+$$;
 
-comment on function tests.test_roles is
-    'Make sure that the roles are set up correctly.';
+comment on function tests.test_roles is 'Make sure that the roles are set up
+       correctly.';
 
 ```

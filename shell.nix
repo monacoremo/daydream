@@ -16,19 +16,22 @@ let
 
         echo "Formatting Haskell code..."
         find "${project.settings.sourceDir}" -iname "*.hs" \
-          -exec ${pkgs.ormolu}/bin/ormolu --mode inplace {} +
+          -exec ${pkgs.ormolu}/bin/ormolu --mode inplace {} \;
 
         echo "Formatting Nix code..."
         ${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt "${project.settings.sourceDir}"
 
         echo "Formatting SQL code embedded in Markdown files..."
-        find "${project.settings.sourceDir}" -iname "*.sql.md" \
-          -exec ${autoformatMdSql} {} +
+        find "${project.settings.sourceDir}" -iname "*.sql.md" -exec ${autoformatMdSql} {} \;
+
+        echo "Formatting Markdown files..."
+        prettier --write "${project.settings.sourceDir}"/db/*.md
       '';
 
   autoformatMdSql =
     project.checkedShellScript "autoformat-md-sql"
       ''
+        echo "Formatting $1"
         tmpfile="$(mktemp)"
         ${pkgs.gnused}/bin/sed -f ${project.md2sql} < "$1" \
           | ${pkgs.pgformatter}/bin/pg_format -u 1 -w 80 \
@@ -39,6 +42,9 @@ let
 
   black =
     pkgs.python3.withPackages (ps: [ ps.black ]);
+
+  prettier =
+    pkgs.nodePackages.prettier;
 in
 project.pkgs.mkShell {
   name = "${project.settings.appName}-env";
@@ -68,11 +74,11 @@ project.pkgs.mkShell {
     project.nixpkgsUpdate.bin
     project.python
     autoformat.bin
+    autoformatMdSql.bin
     pkgs.curl
     pkgs.elmPackages.elm
     pkgs.silver-searcher
     pkgs.cabal2nix
-    pkgs.pgformatter
   ];
 
   shellHook = ''

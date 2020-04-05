@@ -1,17 +1,15 @@
 # Users
 
 ```sql
-create table app.users
-    ( user_id     bigserial primary key
-    , email       citext not null
-    , name        text not null
-    , password    text not null
+create table app.users (
+    user_id bigserial primary key,
+    email citext not null,
+    name text not null,
+    password text not null,
+    unique (email)
+);
 
-    , unique (email)
-    );
-
-comment on table app.users is
-    'Users of the application';
+comment on table app.users is 'Users of the application';
 
 ```
 
@@ -27,26 +25,22 @@ capitalizing it differently.
 To validate the email, it would be best to create a [custom
 domain](https://dba.stackexchange.com/a/165923):
 
-
 create extension plperl;
-create language plperlu;
-
 create function validate_email(email citext)
-    returns boolean
-    language plperlu
-    immutable
-    leakproof
-    strict
-    as $$
+returns boolean
+language plperlu
+immutable
+leakproof
+strict
+as \$$
          use Email::Valid;
          my $email = shift;
-         Email::Valid->address($email) or die "Invalid email address: $email\n";
-         return 'true';
-    $$;
+Email::Valid->address($email) or die "Invalid email address: $email\n";
+return 'true';
+\$\$;
 
 create domain valid_email as citext not null
-    constraint valid_email_check check (validate_email(value))
-
+constraint valid_email_check check (validate_email(value))
 
 We could then use `valid_email` as the column type. We will skip this for this
 example, as it would require another extension that might not be available by
@@ -57,23 +51,21 @@ default.
 We need to salt and hash all passwords, which we will ensure using a trigger.
 
 ```sql
-create function app.cryptpassword()
+create function app.cryptpassword ()
     returns trigger
     language plpgsql
     as $$
-        begin
-            if tg_op = 'INSERT' or new.password <> old.password then
-                new.password = crypt(new.password, gen_salt('bf'));
-            end if;
-            return new;
-        end
-    $$;
+begin
+    if tg_op = 'INSERT' or new.password <> old.password then
+        new.password = crypt(new.password, gen_salt('bf'));
+    end if;
+    return new;
+end
+$$;
 
 create trigger cryptpassword
-    before insert or update
-    on app.users
-    for each row
-    execute procedure app.cryptpassword();
+    before insert or update on app.users for each row
+    execute procedure app.cryptpassword ();
 
 ```
 
@@ -83,12 +75,12 @@ to use plain SQL where possible to define functions, but using the procedural
 language is necessary in this case. Trigger functions receive several implicit
 arguments, including:
 
-* `tg_op` will be set to the operator of the triggering query, e.g. `INSERT`,
+- `tg_op` will be set to the operator of the triggering query, e.g. `INSERT`,
   `UPDATE` etc.
-* `old` will be set to the version of the record before the query was executed.
+- `old` will be set to the version of the record before the query was executed.
   For newly created created records with `INSERT`, there is no previous record
   and `old` will be set to null.
-* `new` is the potential new record that resulted from the triggering query.
+- `new` is the potential new record that resulted from the triggering query.
 
 The trigger function returns a record that will be used instead of `new`.
 
@@ -105,19 +97,15 @@ The `auth` role will need to be able to reference the users and to select
 certain fields in order to validate credentials:
 
 ```sql
-grant references, select(user_id, email, password) on table app.users to auth;
+grant references, select (user_id, email, password) on table app.users to auth;
 
 ```
 
 We will grant selective permissions to our API:
 
 ```sql
-grant
-        select(user_id, name, email),
-        insert(name, email, password),
-        update(name, email, password)
-    on table app.users
-    to api;
+grant select (user_id, name, email), insert (name, email, password), update
+    (name, email, password) on table app.users to api;
 
 ```
 
@@ -164,15 +152,17 @@ currently authenticated user. See [`auth.authenticate`](#authentication-hook)
 for the function that sets the value as a local setting.
 
 ```sql
-create function app.current_user_id()
+create function app.current_user_id ()
     returns integer
     language sql
     as $$
-        select nullif(current_setting('auth.user_id', true), '')::integer
-    $$;
+    select
+        nullif (current_setting('auth.user_id', true),
+            '')::integer
+$$;
 
-comment on function app.current_user_id is
-    'User_id of the currently authenticated user, or null if not authenticated.';
+comment on function app.current_user_id is 'User_id of the currently
+              authenticated user, or null if not authenticated.';
 
 ```
 
@@ -189,20 +179,16 @@ Web-users should be able to see all other users (we'll restrict the columns
 through the API views), but only edit their own record.
 
 ```sql
-create policy webuser_read_user
-    on app.users
-    for select
-    using (current_setting('role') = 'webuser');
+create policy webuser_read_user on app.users for select using
+    (current_setting('role') = 'webuser');
 
-create policy webuser_update_user
-    on app.users
-    for update
-    using (current_setting('role') = 'webuser' and user_id = app.current_user_id());
+create policy webuser_update_user on app.users for update using
+    (current_setting('role') = 'webuser'
+    and user_id = app.current_user_id ());
 
 ```
 
-Policies can be created for specific roles using a `to` clause, e.g.  `create
-policy webuser_read_user to webuser for ...`. This would, however, not work for
+Policies can be created for specific roles using a `to` clause, e.g. `create policy webuser_read_user to webuser for ...`. This would, however, not work for
 this use-case. We will define views in a separate API schema that will be owned
 by the `api` role. When a `webuser` uses those views, the policy checks would
 be run against the role of the view owner, `api`. `current_setting('role')`
@@ -213,22 +199,14 @@ The `auth` role will need to select users in order to validate their
 credentials:
 
 ```sql
-create policy auth_read_user
-    on app.users
-    for select
-    to auth
-    using (true);
+create policy auth_read_user on app.users for select to auth using (true);
 
 ```
 
 Our API should be able to register new users:
 
 ```sql
-create policy api_insert_user
-    on app.users
-    for insert
-    to api
-    with check (true);
+create policy api_insert_user on app.users for insert to api with check (true);
 
 ```
 
@@ -256,18 +234,18 @@ table in our API.
 
 ```sql
 create view api.users as
-    select
-        user_id,
-        name
-    from
-        app.users;
+select
+    user_id,
+    name
+from
+    app.users;
 
 ```
 
 We grant web-users selective permissions on that view:
 
 ```sql
-grant select, update(name) on api.users to webuser;
+grant select, update (name) on api.users to webuser;
 
 ```
 
@@ -289,18 +267,23 @@ create function api.current_user()
     language sql
     security definer
     as $$
-        select user_id, name, email
-            from app.users
-            where user_id = app.current_user_id();
-    $$;
+    select
+        user_id,
+        name,
+        email
+    from
+        app.users
+    where
+        user_id = app.current_user_id ();
 
-comment on function api.current_user is
-    'Information about the currently authenticated user';
+$$;
+
+comment on function api.current_user is 'Information about the currently
+              authenticated user';
 
 grant execute on function api.current_user to webuser;
 
 ```
-
 
 ### Resetting role from `api` to the superuser
 

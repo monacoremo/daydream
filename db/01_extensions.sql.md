@@ -7,9 +7,10 @@ us to define and run tests within the database.
 
 ```sql
 \echo 'Creating extensions...'
-
 create extension pgcrypto;
+
 create extension citext;
+
 create extension pgtap;
 
 ```
