@@ -17,7 +17,8 @@ DBTEST_BIN = os.environ.get('TESTS_DBTEST_BIN')
 
 
 TapPlan = namedtuple('TapPlan', 'indent amount')
-TapTestLine = namedtuple('TapTestLine', 'indent ok number description directive subtests')
+TapTestLine = namedtuple(
+    'TapTestLine', 'indent ok number description directive subtests')
 TapSubtest = namedtuple('TapSubtest', 'indent name')
 
 
@@ -29,7 +30,6 @@ tap_plan = re.compile(r'(\s*)1..(\d+)')
 tap_subtest = re.compile(r'(\s*)# Subtest: (.*)')
 
 
-
 def test_db():
     'Run database tests and parse TAP results.'
 
@@ -38,9 +38,11 @@ def test_db():
     result_text = completed.stdout.decode('utf-8')
     result_lines = result_text.split('\n')
 
-    assert result_lines[0].strip() == 'test results', 'unexpected result format'
+    assert result_lines[0].strip(
+    ) == 'test results', 'unexpected result format'
     assert re.fullmatch(r'-+', result_lines[1]), 'unexpected result format'
-    assert re.fullmatch(r'\(\d+ rows\)', result_lines[-3]), 'unexpected result format'
+    assert re.fullmatch(
+        r'\(\d+ rows\)', result_lines[-3]), 'unexpected result format'
 
     tap_lines = [line[1:] for line in result_lines[2:-3]]
 

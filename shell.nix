@@ -37,6 +37,7 @@ project.pkgs.mkShell {
     project.pkgs.elmPackages.elm-format
     project.pkgs.silver-searcher
     project.pkgs.cabal2nix
+    project.pkgs.pythonPackages.autopep8
   ];
 
   shellHook = ''

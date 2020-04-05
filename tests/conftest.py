@@ -15,7 +15,6 @@ SERVICE_BIN = os.environ['TESTS_SERVICE_BIN']
 SERVICE_ENDPOINT = os.environ['TESTS_SERVICE_URI']
 
 
-
 # SERVICE
 
 
@@ -63,7 +62,6 @@ def retry_until_ok(url, retries=100):
     raise Timeout()
 
 
-
 # SELENIUM
 
 
@@ -79,7 +77,6 @@ def webdriver():
         yield driver
     finally:
         driver.quit()
-
 
 
 # ACCOUNTS AND SESSIONS
