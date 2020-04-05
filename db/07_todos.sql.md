@@ -20,7 +20,7 @@ create table app.todos (
 comment on table app.todos is 'Todo items that can optionally be set to public.';
 
 comment on column app.todos.public is 'Todo item will be visible to all users
-                if public.';
+                  if public.';
 
 ```
 
