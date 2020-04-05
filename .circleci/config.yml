@@ -1,6 +1,6 @@
 version: 2.1
 jobs:
-  build:
+  test:
     docker:
       - image: monacoremo/nix:2020-03-15-13e7a3e1-circleci
     steps:
@@ -47,3 +47,9 @@ jobs:
           name: Build and cache results on Cachix
           command: |
             nix-build | cachix push monacoremo
+workflows:
+  version: 2
+  build:
+    jobs:
+      - cachix
+      - test
