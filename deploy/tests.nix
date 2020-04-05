@@ -6,6 +6,7 @@
 , entr
 , firefox
 , geckodriver
+, utillinux
 }:
 
 let
@@ -26,7 +27,7 @@ rec {
       ''
         export PATH=${geckodriver}/bin:${firefox}/bin:"$PATH"
 
-        ${testPython}/bin/py.test "${settings.sourceDir}"/tests "$@"
+        ${utillinux}/bin/setsid ${testPython}/bin/py.test "${settings.sourceDir}"/tests "$@"
       '';
 
   runWithTmpEnv =
