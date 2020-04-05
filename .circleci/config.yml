@@ -2,13 +2,9 @@ version: 2.1
 jobs:
   test:
     docker:
-      - image: monacoremo/nix:2020-03-15-13e7a3e1-circleci
+      - image: monacoremo/nix:2020-04-05-05f09348-circleci
     steps:
       - checkout
-      - run:
-          name: Install Cachix
-          command: |
-            nix-env -iA cachix -f https://cachix.org/api/v1/install
       - run:
           name: Use Cachix
           command: |
@@ -40,13 +36,9 @@ jobs:
           path: test-results
   cachix:
     docker:
-      - image: monacoremo/nix:2020-03-15-13e7a3e1-circleci
+      - image: monacoremo/nix:2020-04-05-05f09348-circleci
     steps:
       - checkout
-      - run:
-          name: Install Cachix
-          command: |
-            nix-env -iA cachix -f https://cachix.org/api/v1/install
       - run:
           name: Use Cachix
           command: |

@@ -3,6 +3,7 @@ import os
 import time
 import sys
 from contextlib import contextmanager
+import signal
 
 import pytest
 import requests
@@ -31,16 +32,13 @@ def service_endpoint():
 def service_process():
     '''Spin up and terminate the service.'''
 
-    sid = os.getsid(os.getpid())
-
     # spawn process with a new process group, so that it can be terminated by
     # itself
     with subprocess.Popen(SERVICE_BIN, preexec_fn=os.setsid) as process:
         try:
             yield process
         finally:
-            if os.getsid(process.pid) != sid:
-                process.terminate()
+            process.send_signal(signal.SIGINT)
 
 
 def retry_until_ok(url, retries=100):
