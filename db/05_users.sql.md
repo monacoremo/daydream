@@ -97,7 +97,7 @@ The `auth` role will need to be able to reference the users and to select
 certain fields in order to validate credentials:
 
 ```sql
-grant references, select (user_id, email, password) on table app.users to auth;
+grant references, select (user_id, email, name, password) on table app.users to auth;
 
 ```
 
@@ -162,7 +162,7 @@ create function app.current_user_id ()
 $$;
 
 comment on function app.current_user_id is 'User_id of the currently
-                                                        authenticated user, or null if not authenticated.';
+                                                          authenticated user, or null if not authenticated.';
 
 ```
 
@@ -279,7 +279,7 @@ create function api.current_user()
 $$;
 
 comment on function api.current_user is 'Information about the currently
-                                                        authenticated user';
+                                                          authenticated user';
 
 grant execute on function api.current_user to webuser;
 

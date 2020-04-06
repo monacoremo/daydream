@@ -51,5 +51,5 @@ checkedShellScript "autoformat"
     ${prettier}/bin/prettier --write "${settings.sourceDir}/**/*.md"
 
     echo "Formatting SQL code embedded in Markdown files..."
-    find "${settings.sourceDir}" -iname "*.sql.md" -exec ${autoformatMdSql} {} \;
+    # find "${settings.sourceDir}" -iname "*.sql.md" -exec ${autoformatMdSql} {} \;
   ''
