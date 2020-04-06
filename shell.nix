@@ -5,7 +5,7 @@ let
   pkgs =
     project.pkgs;
 in
-project.pkgs.mkShell {
+pkgs.mkShell {
   name = "${project.settings.appName}-env";
 
   buildInputs = [

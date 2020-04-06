@@ -1,5 +1,3 @@
-{ pkgs }:
+{ haskellPackages }:
 
-{
-  postgrestToElm = pkgs.haskellPackages.callCabal2nix "postgrest-to-elm" ./. {};
-}
+haskellPackages.callCabal2nix "postgrest-to-elm" ./. {}

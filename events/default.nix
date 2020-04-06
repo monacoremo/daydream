@@ -1,5 +1,3 @@
-{ pkgs }:
+{ haskellPackages }:
 
-{
-  events = pkgs.haskellPackages.callCabal2nix "events" ./. {};
-}
+haskellPackages.callCabal2nix "events" ./. {}

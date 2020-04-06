@@ -99,10 +99,10 @@ rec {
     deploy/utils/sql2md.sed;
 
   events =
-    (pkgs.callPackage events/default.nix {}).events;
+    pkgs.callPackage events/default.nix {};
 
   postgrestToElm =
-    (pkgs.callPackage deploy/postgrest-to-elm/default.nix {}).postgrestToElm;
+    pkgs.callPackage deploy/postgrest-to-elm/default.nix {};
 
   autoformat =
     pkgs.callPackage deploy/autoformat.nix
