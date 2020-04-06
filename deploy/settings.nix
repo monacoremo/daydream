@@ -22,6 +22,7 @@ let
     dbName = "${dbPrefix}NAME";
     dbSuperuser = "${dbPrefix}SUPERUSER";
     dbSuperuserPassword = "${dbPrefix}SUPERUSER_PW";
+    dbApiserver = "${dbPrefix}APISERVER";
     dbApiserverPassword = "${dbPrefix}APISERVER_PW";
     dbSetupHost = "${dbPrefix}SETUP_HOST";
     dbSetupURI = "${dbPrefix}SETUP_URI";

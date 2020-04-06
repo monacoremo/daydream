@@ -23,14 +23,6 @@ rec {
     pkgs.callPackage deploy/settings.nix
       { inherit appName; };
 
-  webapp =
-    pkgs.callPackage deploy/webapp.nix
-      {
-        inherit settings events dbLocal dbLocalSettings deployLocal
-          checkedShellScript postgrestToElm
-          ;
-      };
-
   docs =
     pkgs.callPackage deploy/docs.nix
       { inherit settings checkedShellScript python; };
@@ -47,6 +39,14 @@ rec {
     pkgs.callPackage deploy/db.nix
       { inherit settings checkedShellScript md2sql; };
 
+  webapp =
+    pkgs.callPackage deploy/webapp.nix
+      {
+        inherit settings events dbLocal dbLocalSettings deployLocal
+          checkedShellScript postgrestToElm
+          ;
+      };
+
   dbLocal =
     pkgs.callPackage deploy/db.nix
       { inherit checkedShellScript md2sql; settings = dbLocalSettings; };
@@ -61,11 +61,14 @@ rec {
       dbSuperuserPassword = "postgres";
       dbSetupHost = "${dbDir}/setup";
       dbSrc = settings.dbSrc;
-      dbSetupURI = "postgres:///postgres?host=${dbSetupHost}&user=postgres&password=postgres";
-      dbApiserverPassword = "localpw";
+      dbSetupURI =
+        "postgres:///${dbName}?host=${dbSetupHost}&user=${dbSuperuser}"
+        + "&password=${dbSuperuserPassword}";
+      dbApiserver = "authenticator";
+      dbApiserverPassword = "postgres";
       dbApiserverURI =
-        "postgres:///postgres?host=${dbHost}"
-        + "&user=authenticator&password=${dbApiserverPassword}";
+        "postgres:///${dbName}?host=${dbHost}"
+        + "&user=${dbApiserver}&password=${dbApiserverPassword}";
     };
 
   deployLocal =
@@ -73,12 +76,7 @@ rec {
       { inherit settings checkedShellScript python db api ingress webapp docs logmux; };
 
   python =
-    pkgs.python38.withPackages
-      (
-        ps: [
-          ps.click
-        ]
-      );
+    pkgs.python38;
 
   tests =
     pkgs.callPackage deploy/tests.nix
@@ -92,7 +90,10 @@ rec {
       { inherit checkedShellScript; };
 
   logmux =
-    deploy/utils/logmux.py;
+    python.withPackages (
+      ps:
+        [ ps.callPackage deploy/python-packages/logmux.nix {} ]
+    );
 
   md2sql =
     deploy/utils/md2sql.sed;

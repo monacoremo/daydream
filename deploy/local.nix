@@ -57,7 +57,7 @@ rec {
   tailLogs =
     checkedShellScript "${binPrefix}taillogs"
       ''
-        ${python}/bin/python ${logmux} \
+        ${logmux}/bin/logmux \
             "${settings.dbLogfile}?label=db&color=red" \
             "${settings.apiLogfile}?label=api&color=blue" \
             "${settings.ingressLogfile}?label=ingress&color=green" \
@@ -100,13 +100,14 @@ rec {
         export ${settings.vars.dbHost}="\${settings.dbDir}"
         export ${settings.vars.dbName}=postgres
         export ${settings.vars.dbSuperuser}=postgres
+        export ${settings.vars.dbApiserver}=authenticator
         export ${settings.vars.dbURI}="postgresql:///\${settings.dbName}?host=\${settings.dbHost}"
         export ${settings.vars.dbSuperuserPassword}=$(${pwgen}/bin/pwgen 32 1)
         export ${settings.vars.dbApiserverPassword}=$(${pwgen}/bin/pwgen 32 1)
         export ${settings.vars.dbSetupHost}="\${settings.dbDir}/setupsocket"
         export ${settings.vars.dbSetupURI}="postgresql:///\${settings.dbName}?host=\${settings.dbSetupHost}&user=\${settings.dbSuperuser}&password=\${settings.dbSuperuserPassword}"
         export ${settings.vars.dbSuperuserURI}="\${settings.dbURI}&user=\${settings.dbSuperuser}&password=\${settings.dbSuperuserPassword}"
-        export ${settings.vars.dbApiserverURI}="\${settings.dbURI}&user=authenticator&password=\${settings.dbApiserverPassword}"
+        export ${settings.vars.dbApiserverURI}="\${settings.dbURI}&user=\${settings.dbApiserver}&password=\${settings.dbApiserverPassword}"
 
         export ${settings.vars.apiLogfile}="\${settings.dir}/api.log"
         export ${settings.vars.apiDir}="\${settings.dir}/api"

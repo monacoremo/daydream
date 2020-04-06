@@ -97,7 +97,8 @@ rec {
         done
 
         ${postgresql}/bin/psql "${settings.dbSetupURI}" << EOF
-          alter role authenticator with password '${settings.dbApiserverPassword}';
+          alter role ${settings.dbApiserver}
+            with password '${settings.dbApiserverPassword}';
         EOF
 
         ${postgresql}/bin/pg_ctl stop

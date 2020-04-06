@@ -6,24 +6,24 @@ pkgs:
       overrides =
         newPkgs: oldPkgs: rec {
           servant-to-elm =
-            newPkgs.callPackage haskell/servant-to-elm.nix {};
+            newPkgs.callPackage haskell-packages/servant-to-elm.nix {};
 
           haskell-to-elm =
-            newPkgs.callPackage haskell/haskell-to-elm.nix
+            newPkgs.callPackage haskell-packages/haskell-to-elm.nix
               { inherit elm-syntax; };
 
           elm-syntax =
-            newPkgs.callPackage haskell/elm-syntax.nix {};
+            newPkgs.callPackage haskell-packages/elm-syntax.nix {};
 
           postgrest =
-            newPkgs.callPackage haskell/postgrest.nix
+            newPkgs.callPackage haskell-packages/postgrest.nix
               { inherit hasql-pool configurator-pg; };
 
           hasql-pool =
-            newPkgs.callPackage haskell/hasql-pool.nix {};
+            newPkgs.callPackage haskell-packages/hasql-pool.nix {};
 
           configurator-pg =
-            newPkgs.callPackage haskell/configurator-pg.nix {};
+            newPkgs.callPackage haskell-packages/configurator-pg.nix {};
         };
     };
 }

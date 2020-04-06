@@ -11,7 +11,7 @@ separate schemas later and isolate all PostgREST specific parts there.
 create schema app;
 
 comment on schema app is 'Schema that contains the state and business logic of
-                              the application.';
+                                     the application.';
 
 ```
 
@@ -42,7 +42,7 @@ though the underlying application changes.
 create schema authorization api;
 
 comment on schema api is 'Schema that defines an API suitable to be exposed
-                              through PostgREST';
+                                     through PostgREST';
 
 ```
 
@@ -93,7 +93,7 @@ begin
                 pg_tables
             where
                 schemaname = 'app'), 'Row level security should be enabled for
-                          		    all tables in schema app');
+                                 		    all tables in schema app');
     return next tables_are ('api',
         array[]::name[]);
     return next view_owner_is ('api',
@@ -119,6 +119,6 @@ end;
 $$;
 
 comment on function tests.test_schemas is 'Test that the schemas and the access
-                              to them is set up correctly.';
+                                     to them is set up correctly.';
 
 ```

@@ -37,6 +37,6 @@ stdenv.mkDerivation rec {
 
   installPhase =
     ''
-      cp ${bin}/bin/${name} $out
+      ln -s ${bin}/bin/${name} $out
     '';
 }
