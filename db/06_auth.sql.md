@@ -92,7 +92,7 @@ create function auth.clean_sessions ()
 $$;
 
 comment on function auth.clean_sessions is 'Cleans up sessions that have
-                                                 expired longer than a day ago.';
+                                                  expired longer than a day ago.';
 
 ```
 
@@ -125,7 +125,7 @@ create function auth.login (email text, password text)
 $$;
 
 comment on function auth.login is 'Returns the token for a newly created
-                                                 session or null on failure.';
+                                                  session or null on failure.';
 
 ```
 
@@ -192,7 +192,7 @@ create function auth.refresh_session (session_token text)
 $$;
 
 comment on function auth.refresh_session is 'Extend the expiration time of the
-                                                 given session.';
+                                                  given session.';
 
 ```
 
@@ -253,7 +253,7 @@ create function auth.session_user_id (session_token text)
 $$;
 
 comment on function auth.session_user_id is 'Returns the id of the user
-                                                 currently authenticated, given a session token';
+                                                  currently authenticated, given a session token';
 
 ```
 
@@ -302,7 +302,7 @@ end;
 $$;
 
 comment on function auth.authenticate is 'Sets the role and user_id based on
-                                                 the session token given as a cookie.';
+                                                  the session token given as a cookie.';
 
 grant execute on function auth.authenticate to anonymous;
 
@@ -418,7 +418,7 @@ end;
 $$;
 
 comment on function api.refresh_session is 'Reset the expiration time of the
-                                                 given session.';
+                                                  given session.';
 
 grant execute on function api.refresh_session to webuser;
 
@@ -446,7 +446,7 @@ end;
 $$;
 
 comment on function api.logout is 'Expires the given session and resets the
-                                                 session cookie.';
+                                                  session cookie.';
 
 grant execute on function api.logout to webuser;
 
@@ -472,7 +472,7 @@ end;
 $$;
 
 comment on function api.register is 'Registers a new user and creates a new
-                                                 session for that account.';
+                                                  session for that account.';
 
 ```
 
@@ -534,16 +534,16 @@ declare
     user_info record;
 begin
     insert into app.users (email, name, password)
-        values ('alice@test.org', 'Alice', 'alicesecret')
+        values ('alice-test@test.org', 'Alice', 'alicesecret')
     returning
         user_id into alice_user_id;
     insert into app.users (email, name, password)
-        values ('bob@test.org', 'Bob', 'bobsecret')
+        values ('bob-test@test.org', 'Bob', 'bobsecret')
     returning
         user_id into alice_user_id;
     -- invalid password
     select
-        auth.login ('alice@test.org',
+        auth.login ('alice-test@test.org',
             'invalid') into session_token;
     return next is (session_token,
         null,
@@ -557,7 +557,7 @@ begin
         'No session should be created with an invalid user');
     -- valid login returns session token
     select
-        auth.login ('alice@test.org',
+        auth.login ('alice-test@test.org',
             'alicesecret') into session_token;
     return next isnt (session_token,
         null,
@@ -565,14 +565,14 @@ begin
     -- invalid login via the api
     prepare invalid_api_login as
     select
-        api.login ('bob@test.org',
+        api.login ('bob-test@test.org',
             'invalid');
     return next throws_ok ('invalid_api_login',
         'insufficient_privilege',
         'The api.login endpoint should throw on invalid logins');
     -- login via the api
     select
-        api.login ('bob@test.org',
+        api.login ('bob-test@test.org',
             'bobsecret') into user_info;
     return next isnt (user_info,
         null,
