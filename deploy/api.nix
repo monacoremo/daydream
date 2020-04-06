@@ -1,10 +1,13 @@
 { settings
 , writeText
 , checkedShellScript
-, postgrest
 , entr
+, haskellPackages
 }:
 let
+  postgrest =
+    haskellPackages.postgrest;
+
   postgrestConf =
     writeText "postgrest.conf"
       ''

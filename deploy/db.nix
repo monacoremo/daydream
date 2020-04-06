@@ -5,8 +5,31 @@
 , entr
 , md2sql
 , gnused
+, postgresql_12
+, perl
 }:
 let
+  postgresqlWithPerl =
+    postgresql_12.overrideAttrs (
+      attrs: {
+        configureFlags =
+          attrs.configureFlags ++ [ "--with-perl" ];
+
+        buildInputs =
+          attrs.buildInputs ++ [
+            (perl.withPackages (ps: [ ps.EmailValid ]))
+          ];
+      }
+    );
+
+  postgresql =
+    postgresqlWithPerl.withPackages
+      (
+        ps: [
+          ps.pgtap
+        ]
+      );
+
   postgresConf =
     writeText "postgresql.conf"
       ''
