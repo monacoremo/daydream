@@ -90,10 +90,7 @@ rec {
       { inherit checkedShellScript; };
 
   logmux =
-    python.withPackages (
-      ps:
-        [ ps.callPackage deploy/python-packages/logmux.nix {} ]
-    );
+    python.pkgs.callPackage deploy/python-packages/logmux.nix {};
 
   md2sql =
     deploy/utils/md2sql.sed;

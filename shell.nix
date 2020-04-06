@@ -37,6 +37,7 @@ project.pkgs.mkShell {
     pkgs.elmPackages.elm
     pkgs.silver-searcher
     pkgs.cabal2nix
+    pkgs.python.pkgs.flask
   ];
 
   shellHook = ''
