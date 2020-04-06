@@ -22,7 +22,7 @@ import PostgrestToElm.ApiStructure (ApiStructure (..), ApiTable (..))
 
 fromApiStructure :: ApiStructure -> [(Elm.Module, Doc Text)]
 fromApiStructure apiStructure =
-  modules $ apiToElm ["Api"] apiStructure
+  modules $ apiToElm ["Generated", "Api"] apiStructure
 
 modules :: [Elm.Definition] -> [(Elm.Module, Doc Text)]
 modules definitions =

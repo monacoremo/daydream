@@ -65,7 +65,7 @@ printElmModule moduleName contents =
 definitions :: [Elm.Definition]
 definitions =
   map
-    (ServantToElm.elmEndpointDefinition "Config.urlBase" ["Api", "Events"])
+    (ServantToElm.elmEndpointDefinition "Config.urlBase" ["Generated", "Api", "Events"])
     (ServantToElm.elmEndpoints @API)
     <> HaskellToElm.jsonDefinitions @Command
 

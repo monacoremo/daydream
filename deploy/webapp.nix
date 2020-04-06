@@ -42,7 +42,7 @@ rec {
         echo "Generating Elm bindings..."
         ${events}/bin/elmgen --target-directory "${settings.webappDir}/src"
         ${generatePostgrestBindings}
-        ${elmPackages.elm-format}/bin/elm-format "${settings.webappDir}/src/Api" --yes
+        ${elmPackages.elm-format}/bin/elm-format "${settings.webappDir}/src/Generated" --yes
 
         echo "Building..."
         cd "${settings.webappDir}"
