@@ -4,7 +4,7 @@ set -eu
 
 rootdir="$(git rev-parse --show-toplevel)"
 
-files="$(git diff --cached --name-only)"
+files="$(git diff --cached --name-only --diff-filter=ACMR)"
 
 if git rev-parse --verify HEAD >/dev/null 2>&1
 then
@@ -16,6 +16,8 @@ fi
 
 # Redirect output to stderr.
 exec 1>&2
+
+cd "$rootdir"
 
 nix-shell --run autoformat
 
