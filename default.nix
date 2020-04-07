@@ -73,7 +73,11 @@ rec {
 
   deployLocal =
     pkgs.callPackage deploy/local.nix
-      { inherit settings checkedShellScript python db api ingress webapp docs logmux; };
+      {
+        inherit settings checkedShellScript python db api ingress webapp docs
+          randomfreeport logmux
+          ;
+      };
 
   python =
     pkgs.python38;
@@ -107,4 +111,10 @@ rec {
   autoformat =
     pkgs.callPackage deploy/autoformat.nix
       { inherit md2sql sql2md checkedShellScript settings; };
+
+  randomfreeport =
+    checkedShellScript "randomfreeport"
+      ''
+        ${python}/bin/python ${deploy/utils/randomfreeport.py}
+      '';
 }

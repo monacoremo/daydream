@@ -11,6 +11,7 @@
 , webapp
 , docs
 , logmux
+, randomfreeport
 }:
 let
   binPrefix =
@@ -84,6 +85,7 @@ rec {
         sourcedir=$(realpath "$1")
         basedir=$(realpath "$2")
         envfile="$basedir"/env
+        port="$(${randomfreeport})"
 
         mkdir -p "$basedir"
 
@@ -91,7 +93,7 @@ rec {
         #!${runtimeShell}
 
         export ${settings.vars.sourceDir}="$sourcedir"
-        export ${settings.vars.port}=8000
+        export ${settings.vars.port}="$port"
         export ${settings.vars.dir}="$basedir"
         export ${settings.vars.URI}="http://localhost:\${settings.port}"
         export ${settings.vars.dbDir}="\${settings.dir}/db"

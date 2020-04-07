@@ -43,7 +43,7 @@ pkgs.mkShell {
     tmpdir="$(mktemp -d)"
     source "$(${project.deployLocal.mkEnv} . "$tmpdir")"
     trap 'rm -rf $tmpdir' exit
-    echo "Environment for ${project.settings.appName} set up in $tmpdir"
+    echo "${project.settings.appName} set up in $tmpdir and http://localhost:${project.settings.port}/"
 
     # psql variables for convenience
     export PGHOST="${project.settings.dbHost}"
