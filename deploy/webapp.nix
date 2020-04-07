@@ -8,6 +8,7 @@
 , checkedShellScript
 , postgrestToElm
 , writeText
+, silver-searcher
 }:
 let
   binPrefix =
@@ -73,6 +74,9 @@ rec {
   watch =
     checkedShellScript "${binPrefix}watch"
       ''
-        find "${settings.webappSrc}" | ${entr}/bin/entr -d ${build}
+        while true; do
+          ${silver-searcher}/bin/ag -l . "${settings.sourceDir}" | \
+            ${entr}/bin/entr -d ${build}
+        done
       '';
 }

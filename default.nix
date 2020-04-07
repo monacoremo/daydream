@@ -8,11 +8,8 @@ let
       sha256 = nixpkgsVersion.tarballHash;
     };
 
-  packageOverrides =
-    import deploy/overrides.nix;
-
   pkgs =
-    import pinnedPkgs { config = { inherit packageOverrides; }; };
+    import pinnedPkgs { overlays = [ (import deploy/overlay.nix) ]; };
 in
 rec {
   inherit pkgs;
@@ -117,4 +114,7 @@ rec {
       ''
         ${python}/bin/python ${deploy/utils/randomfreeport.py}
       '';
+
+  watch =
+    pkgs.callPackage deploy/watch.nix { inherit checkedShellScript; };
 }

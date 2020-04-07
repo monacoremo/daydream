@@ -1,8 +1,8 @@
-pkgs:
+self: super:
 
 {
   haskellPackages =
-    pkgs.haskellPackages.override {
+    super.haskellPackages.override {
       overrides =
         newPkgs: oldPkgs: rec {
           servant-to-elm =
