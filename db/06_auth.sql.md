@@ -392,29 +392,32 @@ create function api.login (email text, password text)
     returns api.user_info
     language plpgsql
     as $$
-declare
-    session_token text;
-    user_info api.user_info;
-begin
-    select
-        info.token,
-        info.user_id,
-        info.email,
-        info.name
-    from
-        auth.login (login.email,
-            login.password) info into session_token,
-        user_info.user_id,
-        user_info.email,
-        user_info.name;
-    perform
-	set_config('response.headers', '[{"Set-Cookie": "session_token=' ||
-	    session_token || '; Path=/; Max-Age=600; HttpOnly"}]', true);
-    return user_info;
-end;
-$$;
+        declare
+            session_token text;
+            user_info api.user_info;
+        begin
+            select
+                info.token,
+                info.user_id,
+                info.email,
+                info.name
+            from
+                auth.login(login.email, login.password) info
+            into
+                session_token,
+                user_info.user_id,
+                user_info.email,
+                user_info.name;
 
-comment on function api.login is 'Creates a new session given valid credentials.';
+            perform set_config('response.headers', '[{"Set-Cookie": "session_token=' ||
+                session_token || '; Path=/; Max-Age=600; HttpOnly"}]', true);
+
+            return user_info;
+        end;
+    $$;
+
+comment on function api.login is
+    'Creates a new session given valid credentials.';
 
 grant execute on function api.login to anonymous;
 

@@ -15,13 +15,16 @@
             "elm/time": "1.0.0",
             "elm/url": "1.0.0",
             "hecrj/composable-form": "8.0.1",
+            "mdgriffith/elm-animator": "1.0.0",
             "mdgriffith/elm-ui": "1.1.5"
         },
         "indirect": {
+            "avh4/elm-color": "1.0.0",
             "elm/bytes": "1.0.8",
             "elm/file": "1.0.5",
             "elm/virtual-dom": "1.0.2",
-            "elm-community/list-extra": "8.2.3"
+            "elm-community/list-extra": "8.2.3",
+            "ianmackenzie/elm-units": "2.4.0"
         }
     },
     "test-dependencies": {
