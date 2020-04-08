@@ -2,6 +2,7 @@
 , checkedShellScript
 , settings
 , entr
+, silver-searcher
 }:
 let
   binPrefix =
@@ -20,6 +21,9 @@ rec {
   watch =
     checkedShellScript "${binPrefix}watch"
       ''
-        find "${settings.docsSrc}" | ${entr}/bin/entr -r ${build}
+        while true; do
+          ${silver-searcher}/bin/ag -l . "${settings.docsSrc}" | \
+            ${entr}/bin/entr -d ${build}
+        done
       '';
 }

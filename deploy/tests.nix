@@ -6,6 +6,7 @@
 , entr
 , firefox
 , geckodriver
+, silver-searcher
 }:
 let
   testPython =
@@ -39,6 +40,9 @@ rec {
   watch =
     checkedShellScript "${binPrefix}watch"
       ''
-        find "${settings.sourceDir}" | ${entr}/bin/entr ${run}
+        while true; do
+          ${silver-searcher}/bin/ag -l . "${settings.sourceDir}" | \
+            ${entr}/bin/entr -d ${run}
+        done
       '';
 }

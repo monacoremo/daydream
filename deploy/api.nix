@@ -3,6 +3,7 @@
 , checkedShellScript
 , entr
 , haskellPackages
+, silver-searcher
 }:
 let
   postgrest =
@@ -34,6 +35,9 @@ rec {
   watch =
     checkedShellScript "${binPrefix}watch"
       ''
-        find "${settings.dbSrc}" | ${entr}/bin/entr -d -r ${run}
+        while true; do
+          ${silver-searcher}/bin/ag -l . "${settings.dbSrc}" | \
+            ${entr}/bin/entr -dr ${run}
+        done
       '';
 }

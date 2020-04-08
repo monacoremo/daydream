@@ -114,7 +114,4 @@ rec {
       ''
         ${python}/bin/python ${deploy/utils/randomfreeport.py}
       '';
-
-  watch =
-    pkgs.callPackage deploy/watch.nix { inherit checkedShellScript; };
 }
