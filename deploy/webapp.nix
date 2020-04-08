@@ -40,6 +40,9 @@ rec {
         ln -sf "${settings.webappSrc}"/{elm.json,src} "${settings.webappDir}"
         ln -sf "${index}" "${settings.webappWebroot}"/index.html
 
+        # force Elm to cache modules in the working directory
+        #export HOME="${settings.webappDir}"
+
         echo "Generating Elm bindings..."
         ${events}/bin/elmgen --target-directory "${settings.webappDir}/src"
         ${generatePostgrestBindings}
