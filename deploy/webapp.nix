@@ -65,6 +65,9 @@ rec {
         export LOCAL_DB_DIR="$gendir"
 
         ${dbLocal.setup} > /dev/null
+
+        trap "${dbLocal.stopDaemon}" exit
+
         ${dbLocal.startDaemon} > /dev/null
 
         ${postgrestToElm}/bin/postgrest-to-elm \
@@ -72,6 +75,8 @@ rec {
           --target-directory "${settings.webappDir}/src"
 
         ${dbLocal.stopDaemon} > /dev/null
+
+        trap - exit
       '';
 
   watch =
@@ -81,5 +86,12 @@ rec {
           ${silver-searcher}/bin/ag -l . "${settings.sourceDir}" | \
             ${entr}/bin/entr -d ${build}
         done
+      '';
+
+  test =
+    checkedShellScript "${binPrefix}test"
+      ''
+        cd "${settings.webappSrc}"
+        ${elmPackages.elm-test}/bin/elm-test
       '';
 }

@@ -25,6 +25,7 @@ pkgs.mkShell {
     project.webapp.build.bin
     project.webapp.watch.bin
     project.webapp.generatePostgrestBindings.bin
+    project.webapp.test.bin
     project.tests.run.bin
     project.tests.runWithTmpEnv.bin
     project.tests.watch.bin
