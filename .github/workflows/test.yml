@@ -22,4 +22,7 @@ jobs:
       run: |
         source env/env
         daydream-tests-run
-
+    - uses: actions/upload-artifact@v1
+      with:
+        name: test-output
+        path: env/tests

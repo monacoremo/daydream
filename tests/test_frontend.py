@@ -8,7 +8,7 @@ def test_index(service_endpoint, webdriver):
 
     webdriver.get(f"{service_endpoint}/")
 
-    WebDriverWait(webdriver, 3).until(lambda d: "Login" in d.title)
+    WebDriverWait(webdriver, 10).until(lambda d: "Login" in d.title)
     assert "Login" in webdriver.page_source
 
     webdriver.save_screenshot("01_login_screen.png")
@@ -32,5 +32,5 @@ def test_index(service_endpoint, webdriver):
 
     webdriver.save_screenshot("03_submitted.png")
 
-    WebDriverWait(webdriver, 3).until(lambda d: "Logged in" in d.title)
+    WebDriverWait(webdriver, 10).until(lambda d: "Logged in" in d.title)
     webdriver.save_screenshot("04_index_screen.png")
