@@ -13,7 +13,7 @@ import Types.UserInfo as UserInfo exposing (UserInfo)
 import Url.Builder as Url
 
 
-login : String -> String -> Api.Request () msg
+login : String -> String -> Api.Request UserInfo msg
 login email password tagger =
     Api.postGetSingle
         { url =
@@ -25,7 +25,7 @@ login email password tagger =
                     , ( "password", Encode.string password )
                     ]
                 )
-        , expect = Http.expectWhatever tagger
+        , expect = Http.expectJson tagger UserInfo.decoder
         , tracker = Nothing
         , headers = []
         }
@@ -43,7 +43,7 @@ refresh tagger =
 check : Api.Request () msg
 check tagger =
     Api.get
-        { url = Url.absolute [ "api", "rpc", "userinfo" ] []
+        { url = Url.absolute [ "api", "rpc", "user" ] []
         , expect = Http.expectWhatever tagger
         }
 
@@ -60,6 +60,6 @@ logout tagger =
 userInfo : Api.Request UserInfo msg
 userInfo tagger =
     Api.getSingle
-        { url = Url.absolute [ "api", "rpc", "userinfo" ] []
+        { url = Url.absolute [ "api", "rpc", "user" ] []
         , expect = Http.expectJson tagger UserInfo.decoder
         }

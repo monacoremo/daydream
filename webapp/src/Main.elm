@@ -104,7 +104,7 @@ initUserModel userInfo =
 
 
 type Msg
-    = GotLoggedIn (Result Http.Error ())
+    = GotLoggedIn (Result Http.Error UserInfo)
     | InitGotUserInfo (Result Http.Error UserInfo)
     | UrlRequested Browser.UrlRequest
     | UrlChanged Url
@@ -141,15 +141,10 @@ update msg model =
         InitGotUserInfo (Err _) ->
             ( { model | state = LoggedOut (FormOk LoginForm.init) }, Cmd.none )
 
-        GotLoggedIn (Ok ()) ->
+        GotLoggedIn (Ok userInfo) ->
             let
                 ( userModel, cmd ) =
-                    initUserModel
-                        { userid = 1
-                        , name = "Alice"
-                        , email = "alice@test.org"
-                        , role = "webuser"
-                        }
+                    initUserModel userInfo
                         |> routeLoad model.route
             in
             ( { model | state = LoggedIn userModel }

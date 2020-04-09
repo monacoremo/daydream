@@ -4,10 +4,9 @@ import Json.Decode as Decode
 
 
 type alias UserInfo =
-    { userid : Int
+    { userId : Int
     , name : String
     , email : String
-    , role : String
     }
 
 
@@ -17,8 +16,7 @@ type alias UserInfo =
 
 decoder : Decode.Decoder UserInfo
 decoder =
-    Decode.map4 UserInfo
-        (Decode.field "userid" Decode.int)
+    Decode.map3 UserInfo
+        (Decode.field "user_id" Decode.int)
         (Decode.field "name" Decode.string)
         (Decode.field "email" Decode.string)
-        (Decode.field "role" Decode.string)

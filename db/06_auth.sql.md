@@ -15,17 +15,33 @@ We will be able to return to the superuser role later with `reset role;`.
 We will use a table to track user sessions:
 
 ```sql
-create table auth.sessions (
-    token text not null primary key default encode(gen_random_bytes(32), 'base64'),
-    user_id integer not null references app.users,
-    created timestamptz not null default clock_timestamp(),
-    expires timestamptz not null default clock_timestamp() + '15min' ::interval,
-    check (expires > created)
-);
+create table auth.sessions
+    ( token
+        text
+        not null
+        primary key
+        default encode(gen_random_bytes(32), 'base64')
+    , user_id
+        integer
+        not null
+        references app.users
+    , created
+        timestamptz
+        not null
+        default clock_timestamp()
+    , expires
+        timestamptz
+        not null
+        default clock_timestamp() + '15min' ::interval
 
-comment on table auth.sessions is 'User sessions, both active and expired ones.';
+    , check (expires > created)
+    );
 
-comment on column auth.sessions.expires is 'Time on which the session expires.';
+comment on table auth.sessions is
+    'User sessions, both active and expired ones.';
+
+comment on column auth.sessions.expires is
+    'Time on which the session expires.';
 
 ```
 
@@ -50,19 +66,19 @@ that we will be able to build upon later.
 
 ```sql
 create view auth.active_sessions as
-select
-    token,
-    user_id,
-    created,
-    expires
-from
-    auth.sessions
-where
-    expires > clock_timestamp(
-)
+    select
+        token,
+        user_id,
+        created,
+        expires
+    from
+        auth.sessions
+    where
+        expires > clock_timestamp()
     with local check option;
 
-comment on view auth.active_sessions is 'View of the currently active sessions';
+comment on view auth.active_sessions is
+    'View of the currently active sessions';
 
 ```
 
@@ -86,13 +102,12 @@ create function auth.clean_sessions ()
     language sql
     security definer
     as $$
-    delete from auth.sessions
-    where expires < clock_timestamp() - '1day'::interval;
+        delete from auth.sessions
+        where expires < clock_timestamp() - '1day'::interval;
+    $$;
 
-$$;
-
-comment on function auth.clean_sessions is 'Cleans up sessions that have
-                                                   expired longer than a day ago.';
+comment on function auth.clean_sessions is
+    'Cleans up sessions that have expired longer than a day ago.';
 
 ```
 
@@ -106,50 +121,54 @@ We define a login function that creates a new session, using many of the
 defaults that we set in the `sessions` table.
 
 ```sql
-create type auth.login_info as (
-    token text,
-    user_id integer,
-    email text,
-    name text
-);
+create type auth.login_info as
+    ( token text
+    , user_id bigint
+    , email text
+    , name text
+    );
 
 create function auth.login (email text, password text)
     returns auth.login_info
     language plpgsql
     security definer
     as $$
-declare
-    login_info auth.login_info;
-    session_token text;
-begin
-    select
-        users.user_id,
-        users.email,
-        users.name
-    from
-        app.users users
-    where
-        users.email = login.email
-	and users.password = crypt(login.password, users.password) into strict
-	    login_info.user_id,
-        login_info.email,
-        login_info.name;
-    insert into auth.active_sessions (user_id)
-        values (login_info.user_id)
-    returning
-        token into strict login_info.token;
-    raise warning 'LOGIN_INFO %', login_info;
-    return login_info;
-exception
-    when no_data_found then
-        raise insufficient_privilege
-        using detail = 'invalid credentials';
-end;
+        declare
+            login_info auth.login_info;
+            session_token text;
+        begin
+            select
+                users.user_id,
+                users.email,
+                users.name
+            from
+                app.users users
+            where
+                users.email = login.email
+                and users.password = crypt(login.password, users.password)
+            into strict
+                login_info.user_id,
+                login_info.email,
+                login_info.name;
 
-$$;
+            insert into auth.active_sessions (user_id)
+                values (login_info.user_id)
+            returning
+                token
+            into strict
+                login_info.token;
 
-comment on function auth.login is 'Returns the token for a newly created
-                                                   session or null on failure.';
+            return login_info;
+
+        exception
+            when no_data_found then
+                raise insufficient_privilege
+                using detail = 'invalid credentials';
+        end;
+    $$;
+
+comment on function auth.login is
+    'Returns the token for a newly created session or null on failure.';
 
 ```
 
@@ -206,17 +225,17 @@ create function auth.refresh_session (session_token text)
     language sql
     security definer
     as $$
-    update
-        auth.sessions
-    set
-        expires = default
-    where
-        token = session_token
-        and expires > clock_timestamp()
-$$;
+        update
+            auth.sessions
+        set
+            expires = default
+        where
+            token = session_token
+            and expires > clock_timestamp()
+    $$;
 
-comment on function auth.refresh_session is 'Extend the expiration time of the
-                                                   given session.';
+comment on function auth.refresh_session is
+    'Extend the expiration time of the given session.';
 
 ```
 
@@ -240,15 +259,16 @@ create function auth.logout (token text)
     language sql
     security definer
     as $$
-    update
-        auth.sessions
-    set
-        expires = clock_timestamp()
-    where
-        token = logout.token
-$$;
+        update
+            auth.sessions
+        set
+            expires = clock_timestamp()
+        where
+            token = logout.token;
+    $$;
 
-comment on function auth.logout is 'Expire the given session.';
+comment on function auth.logout is
+    'Expire the given session.';
 
 grant execute on function auth.logout to webuser;
 
@@ -267,17 +287,16 @@ create function auth.session_user_id (session_token text)
     language sql
     security definer
     as $$
-    select
-        user_id
-    from
-        auth.active_sessions
-    where
-        token = session_token;
+        select
+            user_id
+        from
+            auth.active_sessions
+        where
+            token = session_token;
+    $$;
 
-$$;
-
-comment on function auth.session_user_id is 'Returns the id of the user
-                                                   currently authenticated, given a session token';
+comment on function auth.session_user_id is
+    'Returns the id of the user currently authenticated, given a session token';
 
 ```
 
@@ -305,28 +324,26 @@ create function auth.authenticate ()
     returns void
     language plpgsql
     as $$
-declare
-    session_token text;
-    session_user_id int;
-begin
-    select
-        current_setting('request.cookie.session_token', true) into session_token;
-    select
-        auth.session_user_id (session_token) into session_user_id;
-    if session_user_id is not null then
-        set local role to webuser;
-        perform
-            set_config('auth.user_id', session_user_id::text, true);
-    else
-        set local role to anonymous;
-        perform
-            set_config('auth.user_id', '', true);
-    end if;
-end;
-$$;
+        declare
+            session_user_id int =
+                auth.session_user_id(
+                    current_setting('request.cookie.session_token', true)
+                );
+        begin
+            if session_user_id is not null then
+                set local role to webuser;
+                perform
+                    set_config('auth.user_id', session_user_id::text, true);
+            else
+                set local role to anonymous;
+                perform
+                    set_config('auth.user_id', '', true);
+            end if;
+        end;
+    $$;
 
-comment on function auth.authenticate is 'Sets the role and user_id based on
-                                                   the session token given as a cookie.';
+comment on function auth.authenticate is
+    'Sets the role and user_id based on the session token given as a cookie.';
 
 grant execute on function auth.authenticate to anonymous;
 
@@ -382,11 +399,11 @@ The `api.login` endpoint wraps the `auth.login` function to add the following:
 - Add a header to the response to set a cookie with the session token.
 
 ```sql
-create type api.user_info as (
-    user_id integer,
-    email text,
-    name text
-);
+create type api.user_info as
+    ( user_id bigint
+    , email text
+    , name text
+    );
 
 create function api.login (email text, password text)
     returns api.user_info
@@ -443,21 +460,24 @@ create function api.refresh_session ()
     returns void
     language plpgsql
     as $$
-declare
-    session_token text;
-begin
-    select
-        current_setting('request.cookie.session_token', false) into strict session_token;
-    perform
-        auth.refresh_session (session_token);
-    perform
-	set_config('response.headers', '[{"Set-Cookie": "session_token=' ||
-	    session_token || '; Path=/; Max-Age=600; HttpOnly"}]', true);
-end;
-$$;
+        declare
+            session_token text =
+                current_setting('request.cookie.session_token', false);
+        begin
+            perform auth.refresh_session(session_token);
 
-comment on function api.refresh_session is 'Reset the expiration time of the
-                                                   given session.';
+            perform set_config(
+                'response.headers',
+                '[{"Set-Cookie": "session_token=' ||
+                    session_token ||
+                    '; Path=/; Max-Age=600; HttpOnly"}]',
+                true
+            );
+        end;
+    $$;
+
+comment on function api.refresh_session is
+    'Reset the expiration time of the given session.';
 
 grant execute on function api.refresh_session to webuser;
 
@@ -476,16 +496,21 @@ create function api.logout ()
     returns void
     language plpgsql
     as $$
-begin
-    perform
-        auth.logout (current_setting('request.cookie.session_token', true));
-    perform
-        set_config('response.headers', '[{"Set-Cookie": "session_token=; Path=/"}]', true);
-end;
-$$;
+        begin
+            perform auth.logout(
+                current_setting('request.cookie.session_token', true)
+            );
 
-comment on function api.logout is 'Expires the given session and resets the
-                                                   session cookie.';
+            perform set_config(
+                'response.headers',
+                '[{"Set-Cookie": "session_token=; Path=/"}]',
+                true
+            );
+        end;
+    $$;
+
+comment on function api.logout is
+    'Expires the given session and resets the session cookie.';
 
 grant execute on function api.logout to webuser;
 
@@ -497,21 +522,20 @@ The registration endpoint will register a new user and create a new session.
 
 ```sql
 create function api.register (email text, name text, password text)
-    returns void
+    returns api.user_info
     security definer
     language plpgsql
     as $$
-begin
-    insert into app.users (email, name, password)
-        values (register.email, register.name, register.password);
-    perform
-        api.login (email,
-            password);
-end;
-$$;
+        begin
+            insert into app.users (email, name, password)
+                values (register.email, register.name, register.password);
 
-comment on function api.register is 'Registers a new user and creates a new
-                                                   session for that account.';
+            return api.login(email, password);
+        end;
+    $$;
+
+comment on function api.register is
+    'Registers a new user and creates a new session for that account.';
 
 ```
 
@@ -519,6 +543,36 @@ Only unauthenticated users should be able to register:
 
 ```sql
 grant execute on function api.register to anonymous;
+
+```
+
+### User info API endpoint
+
+The registration endpoint will register a new user and create a new session.
+
+```sql
+create function api.user ()
+    returns api.user_info
+    security definer
+    language sql
+    as $$
+        select
+            (user_id, email, name) :: api.user_info
+        from
+            app.users
+        where
+            user_id = current_setting('auth.user_id', true)::bigint
+    $$;
+
+comment on function api.user is
+    'Information on the currently authenticated user.';
+
+```
+
+Only unauthenticated users should be able to register:
+
+```sql
+grant execute on function api.user to webuser;
 
 ```
 
@@ -544,14 +598,15 @@ create function tests.impersonate (role name, user_id integer)
     returns text
     language plpgsql
     as $$
-begin
-    select
-        set_config('app.user_id', userid::text, true);
-    set role to role;
-end;
-$$;
+        begin
+            select
+                set_config('app.user_id', userid::text, true);
+            set role to role;
+        end;
+    $$;
 
-comment on function tests.impersonate is 'Impersonate the given role and user.';
+comment on function tests.impersonate is
+    'Impersonate the given role and user.';
 
 ```
 

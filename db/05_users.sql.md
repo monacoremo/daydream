@@ -97,15 +97,23 @@ The `auth` role will need to be able to reference the users and to select
 certain fields in order to validate credentials:
 
 ```sql
-grant references, select (user_id, email, name, password) on table app.users to auth;
+grant
+    references,
+    select (user_id, email, name, password)
+on table app.users
+to auth;
 
 ```
 
 We will grant selective permissions to our API:
 
 ```sql
-grant select (user_id, name, email), insert (name, email, password), update
-    (name, email, password) on table app.users to api;
+grant
+    select (user_id, name, email),
+    insert (name, email, password),
+    update (name, email, password)
+on table app.users
+to api;
 
 ```
 
@@ -161,8 +169,8 @@ create function app.current_user_id ()
             '')::integer
 $$;
 
-comment on function app.current_user_id is 'User_id of the currently
-                                                          authenticated user, or null if not authenticated.';
+comment on function app.current_user_id is
+    'User_id of the currently authenticated user, or null if not authenticated.';
 
 ```
 
