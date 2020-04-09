@@ -30,9 +30,6 @@ module "tests"
         ''
           export PATH=${geckodriver}/bin:${firefox}/bin:"$PATH"
 
-          mkdir -p "${settings.testsDir}"
-          cd "${settings.testsDir}"
-
           ${testPython}/bin/py.test "${settings.sourceDir}"/tests "$@"
         '';
 

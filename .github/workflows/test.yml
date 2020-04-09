@@ -16,14 +16,15 @@ jobs:
       run: nix-env -iA tests deployLocal -f default.nix
     - name: Create environment
       run: |
-        mkdir env
+        mkdir env test-results
         daydream-local-mkenv . env 8000
     - name: Run tests
       run: |
         source env/env
-        daydream-tests-run --junitxml=junit.xml
+        cd test-results
+        daydream-tests-run --junitxml=test-results.xml
     - uses: actions/upload-artifact@v1
       if: always()
       with:
-        name: test-output
-        path: env/tests
+        name: test-results
+        path: test-results
