@@ -91,6 +91,7 @@ rec {
   test =
     checkedShellScript "${binPrefix}test"
       ''
+        export PATH=${elmPackages.elm}/bin:"$PATH"
         cd "${settings.webappSrc}"
         ${elmPackages.elm-test}/bin/elm-test
       '';
