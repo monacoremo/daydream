@@ -1,37 +1,31 @@
-let
-  project =
-    import ./default.nix;
-
-  pkgs =
-    project.pkgs;
-in
+with (import ./default.nix);
 pkgs.mkShell {
-  name = "${project.settings.appName}-env";
+  name = "${settings.binPrefix}env";
 
   buildInputs = [
-    project.api.run.bin
-    project.api.watch.bin
-    project.db.run.bin
-    project.db.watch.bin
-    project.db.setup.bin
-    project.db.startDaemon.bin
-    project.db.stopDaemon.bin
-    project.db.test.bin
-    project.deployLocal.mkEnv.bin
-    project.deployLocal.run.bin
-    project.deployLocal.watch.bin
-    project.ingress.run.bin
-    project.webapp.build.bin
-    project.webapp.watch.bin
-    project.webapp.generatePostgrestBindings.bin
-    project.webapp.test.bin
-    project.tests.run.bin
-    project.tests.watch.bin
-    project.docs.build.bin
-    project.docs.watch.bin
-    project.nixpkgsUpdate.bin
-    project.python
-    project.autoformat.bin
+    api.run.bin
+    api.watch.bin
+    db.run.bin
+    db.watch.bin
+    db.setup.bin
+    db.startDaemon.bin
+    db.stopDaemon.bin
+    db.test.bin
+    deployLocal.mkEnv.bin
+    deployLocal.run.bin
+    deployLocal.watch.bin
+    ingress.run.bin
+    webapp.build.bin
+    webapp.watch.bin
+    webapp.generatePostgrestBindings.bin
+    webapp.test.bin
+    tests.run.bin
+    tests.watch.bin
+    docs.build.bin
+    docs.watch.bin
+    nixpkgsUpdate.bin
+    python
+    autoformat.bin
     pkgs.curl
     pkgs.elmPackages.elm
     pkgs.elmPackages.elm-test
@@ -41,15 +35,20 @@ pkgs.mkShell {
 
   shellHook = ''
     tmpdir="$(mktemp -d)"
-    source "$(${project.deployLocal.mkEnv} . "$tmpdir")"
     trap 'rm -rf $tmpdir' exit
-    echo "${project.settings.appName} set up in $tmpdir and http://localhost:${project.settings.port}/"
+
+    port="$(${randomfreeport})"
+    source "$(${deployLocal.mkEnv} . "$tmpdir" "$port")"
+
+    echo "${settings.appName} set up in ${settings.dir} and ${settings.URI}"
+
+    alias ${settings.binPrefix}open="xdg-open ${settings.URI}"
 
     # psql variables for convenience
-    export PGHOST="${project.settings.dbHost}"
-    export PGDATABASE="${project.settings.dbName}"
-    export PGUSER="${project.settings.dbSuperuser}"
-    export PGPASSWORD="${project.settings.dbSuperuserPassword}"
+    export PGHOST="${settings.dbHost}"
+    export PGDATABASE="${settings.dbName}"
+    export PGUSER="${settings.dbSuperuser}"
+    export PGPASSWORD="${settings.dbSuperuserPassword}"
 
     # disable line wrap in psql
     export PAGER="less -S"

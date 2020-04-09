@@ -13,7 +13,7 @@ jobs:
       - run:
           name: Install the application
           command: |
-            nix-env -iA tests.run.bin deployLocal.mkEnv.bin -f default.nix
+            nix-env -iA deployLocal.mkEnv.bin tests.run.bin -f default.nix
       - run:
           name: Set up the test result directory structure
           command: mkdir -p env test-results
@@ -30,7 +30,7 @@ jobs:
       - run:
           name: Set up an environment
           command: |
-            su-exec user:user daydream-local-mkenv . env
+            su-exec user:user daydream-local-mkenv . env 8000
       - run:
           name: Run tests
           command: |

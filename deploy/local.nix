@@ -84,8 +84,8 @@ rec {
       ''
         sourcedir=$(realpath "$1")
         basedir=$(realpath "$2")
+        port="$3"
         envfile="$basedir"/env
-        port="$(${randomfreeport})"
 
         mkdir -p "$basedir"
 
