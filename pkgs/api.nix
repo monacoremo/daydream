@@ -26,20 +26,20 @@ let
     "${settings.binPrefix}api-";
 in
 module "api"
-rec {
-  run =
-    checkedShellScript "${binPrefix}run"
-      ''
-        mkdir -p "${settings.apiDir}"
-        exec ${postgrest}/bin/postgrest ${postgrestConf}
-      '';
+  rec {
+    run =
+      checkedShellScript "${binPrefix}run"
+        ''
+          mkdir -p "${settings.apiDir}"
+          exec ${postgrest}/bin/postgrest ${postgrestConf}
+        '';
 
-  watch =
-    checkedShellScript "${binPrefix}watch"
-      ''
-        while true; do
-          ${silver-searcher}/bin/ag -l . "${settings.dbSrc}" | \
-            ${entr}/bin/entr -dr ${run}
-        done
-      '';
-}
+    watch =
+      checkedShellScript "${binPrefix}watch"
+        ''
+          while true; do
+            ${silver-searcher}/bin/ag -l . "${settings.dbSrc}" | \
+              ${entr}/bin/entr -dr ${run}
+          done
+        '';
+  }

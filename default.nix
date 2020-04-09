@@ -119,9 +119,9 @@ rec {
       '';
 
   module =
-     name: attrs:
-     attrs // pkgs.stdenv.mkDerivation {
-       inherit name;
-       build-inputs = pkgs.lib.attrValues attrs;
-     };
+    name: attrs:
+      pkgs.buildEnv {
+        inherit name;
+        paths = pkgs.lib.catAttrs "bin" (pkgs.lib.attrValues attrs);
+      } // attrs;
 }

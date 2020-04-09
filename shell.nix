@@ -3,26 +3,13 @@ pkgs.mkShell {
   name = "${settings.binPrefix}env";
 
   buildInputs = [
-    api.run.bin
-    api.watch.bin
-    db.run.bin
-    db.watch.bin
-    db.setup.bin
-    db.startDaemon.bin
-    db.stopDaemon.bin
-    db.test.bin
-    deployLocal.mkEnv.bin
-    deployLocal.run.bin
-    deployLocal.watch.bin
-    ingress.run.bin
-    webapp.build.bin
-    webapp.watch.bin
-    webapp.generatePostgrestBindings.bin
-    webapp.test.bin
-    tests.run.bin
-    tests.watch.bin
-    docs.build.bin
-    docs.watch.bin
+    api
+    db
+    deployLocal
+    ingress
+    webapp
+    tests
+    docs
     nixpkgsUpdate.bin
     python
     autoformat.bin

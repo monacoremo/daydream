@@ -156,15 +156,15 @@ let
     "${settings.binPrefix}ingress-";
 in
 module "ingress"
-{
-  run =
-    checkedShellScript "${binPrefix}run"
-      ''
-        mkdir -p "${settings.ingressDir}"/{logs,conf}
-        touch "${settings.ingressDir}"/logs/{error.log,access.log}
-        ${envsubst}/bin/envsubst -i ${nginxConf} \
-          -o "${settings.ingressDir}/conf/nginx.conf"
+  {
+    run =
+      checkedShellScript "${binPrefix}run"
+        ''
+          mkdir -p "${settings.ingressDir}"/{logs,conf}
+          touch "${settings.ingressDir}"/logs/{error.log,access.log}
+          ${envsubst}/bin/envsubst -i ${nginxConf} \
+            -o "${settings.ingressDir}/conf/nginx.conf"
 
-        exec ${openresty}/bin/openresty -p "${settings.ingressDir}"
-      '';
-}
+          exec ${openresty}/bin/openresty -p "${settings.ingressDir}"
+        '';
+  }

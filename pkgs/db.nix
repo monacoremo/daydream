@@ -59,106 +59,106 @@ let
     "${settings.binPrefix}db-";
 in
 module "db"
-rec {
-  setup =
-    checkedShellScript "${binPrefix}setup"
-      ''
-        ${env}
+  rec {
+    setup =
+      checkedShellScript "${binPrefix}setup"
+        ''
+          ${env}
 
-        echo "setting up in $PGDATA"
+          echo "setting up in $PGDATA"
 
-        cleanup() {
-          ${postgresql}/bin/pg_ctl stop -m i
-          kill 0
-        }
+          cleanup() {
+            ${postgresql}/bin/pg_ctl stop -m i
+            kill 0
+          }
 
-        trap cleanup exit
+          trap cleanup exit
 
-        rm -rf "$PGDATA"
-        mkdir -p "$PGDATA"
+          rm -rf "$PGDATA"
+          mkdir -p "$PGDATA"
 
-        # Initialize the PostgreSQL cluster
-        pwfile=$(mktemp)
-        echo "${settings.dbSuperuserPassword}" > "$pwfile"
+          # Initialize the PostgreSQL cluster
+          pwfile=$(mktemp)
+          echo "${settings.dbSuperuserPassword}" > "$pwfile"
 
-        TZ=UTC ${postgresql}/bin/initdb --no-locale --encoding=UTF8 --nosync \
-          -U "$PGUSER" -A password --pwfile="$pwfile"
+          TZ=UTC ${postgresql}/bin/initdb --no-locale --encoding=UTF8 --nosync \
+            -U "$PGUSER" -A password --pwfile="$pwfile"
 
-        rm "$pwfile"
+          rm "$pwfile"
 
-        mkdir -p "${settings.dbSetupHost}"
+          mkdir -p "${settings.dbSetupHost}"
 
-        ${postgresql}/bin/pg_ctl start \
-          -o "-F -c listen_addresses=\"\" -k ${settings.dbSetupHost}"
+          ${postgresql}/bin/pg_ctl start \
+            -o "-F -c listen_addresses=\"\" -k ${settings.dbSetupHost}"
 
-        for f in "${settings.dbSrc}"/*.sql.md; do
-          filename=$(basename -- "$f")
-          targetpath="${settings.dbDir}/$filename.sql"
-          ${gnused}/bin/sed -f ${md2sql} <"$f" >"$targetpath"
-          ${postgresql}/bin/psql "${settings.dbSetupURI}" -v ON_ERROR_STOP=1 -f "$targetpath"
-        done
+          for f in "${settings.dbSrc}"/*.sql.md; do
+            filename=$(basename -- "$f")
+            targetpath="${settings.dbDir}/$filename.sql"
+            ${gnused}/bin/sed -f ${md2sql} <"$f" >"$targetpath"
+            ${postgresql}/bin/psql "${settings.dbSetupURI}" -v ON_ERROR_STOP=1 -f "$targetpath"
+          done
 
-        ${postgresql}/bin/psql "${settings.dbSetupURI}" << EOF
-          alter role ${settings.dbApiserver}
-            with password '${settings.dbApiserverPassword}';
-        EOF
+          ${postgresql}/bin/psql "${settings.dbSetupURI}" << EOF
+            alter role ${settings.dbApiserver}
+              with password '${settings.dbApiserverPassword}';
+          EOF
 
-        ${postgresql}/bin/pg_ctl stop
+          ${postgresql}/bin/pg_ctl stop
 
-        trap - exit
+          trap - exit
 
-        rm -rf "${settings.dbSetupHost}"
+          rm -rf "${settings.dbSetupHost}"
 
-        cat ${postgresConf} >> "${settings.dbDir}"/postgresql.conf
-      '';
+          cat ${postgresConf} >> "${settings.dbDir}"/postgresql.conf
+        '';
 
-  run =
-    checkedShellScript "${binPrefix}run"
-      ''
-        ${env}
-        ${setup}
+    run =
+      checkedShellScript "${binPrefix}run"
+        ''
+          ${env}
+          ${setup}
 
-        exec ${postgresql}/bin/postgres -F -c listen_addresses="" \
-          -k "${settings.dbHost}"
-      '';
+          exec ${postgresql}/bin/postgres -F -c listen_addresses="" \
+            -k "${settings.dbHost}"
+        '';
 
-  startDaemon =
-    checkedShellScript "${binPrefix}daemon-start"
-      ''
-        ${env}
+    startDaemon =
+      checkedShellScript "${binPrefix}daemon-start"
+        ''
+          ${env}
 
-        ${postgresql}/bin/pg_ctl start \
-          -o "-F -c listen_addresses=\"\" -k ${settings.dbHost}"
-      '';
+          ${postgresql}/bin/pg_ctl start \
+            -o "-F -c listen_addresses=\"\" -k ${settings.dbHost}"
+        '';
 
-  stopDaemon =
-    checkedShellScript "${binPrefix}daemon-stop"
-      ''
-        ${env}
+    stopDaemon =
+      checkedShellScript "${binPrefix}daemon-stop"
+        ''
+          ${env}
 
-        ${postgresql}/bin/pg_ctl stop
-      '';
+          ${postgresql}/bin/pg_ctl stop
+        '';
 
-  watch =
-    checkedShellScript "${binPrefix}watch"
-      ''
-        find "${settings.dbSrc}" | ${entr}/bin/entr -d -r ${run}
-      '';
+    watch =
+      checkedShellScript "${binPrefix}watch"
+        ''
+          find "${settings.dbSrc}" | ${entr}/bin/entr -d -r ${run}
+        '';
 
-  test =
-    checkedShellScript "${binPrefix}test"
-      ''
-        ${setup} > /dev/null
-        ${startDaemon} > /dev/null
+    test =
+      checkedShellScript "${binPrefix}test"
+        ''
+          ${setup} > /dev/null
+          ${startDaemon} > /dev/null
 
-        ${postgresql}/bin/psql "${settings.dbSuperuserURI}" -X -q << EOF
-          begin;
+          ${postgresql}/bin/psql "${settings.dbSuperuserURI}" -X -q << EOF
+            begin;
 
-          select tests.run() "test results";
+            select tests.run() "test results";
 
-          rollback;
-        EOF
+            rollback;
+          EOF
 
-        ${stopDaemon} > /dev/null
-      '';
-}
+          ${stopDaemon} > /dev/null
+        '';
+  }

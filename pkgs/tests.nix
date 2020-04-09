@@ -24,24 +24,24 @@ let
     "${settings.binPrefix}tests-";
 in
 module "tests"
-rec {
-  run =
-    checkedShellScript "${binPrefix}run"
-      ''
-        export PATH=${geckodriver}/bin:${firefox}/bin:"$PATH"
+  rec {
+    run =
+      checkedShellScript "${binPrefix}run"
+        ''
+          export PATH=${geckodriver}/bin:${firefox}/bin:"$PATH"
 
-        mkdir -p "${settings.testsDir}"
-        cd "${settings.testsDir}"
+          mkdir -p "${settings.testsDir}"
+          cd "${settings.testsDir}"
 
-        ${testPython}/bin/py.test "${settings.sourceDir}"/tests "$@"
-      '';
+          ${testPython}/bin/py.test "${settings.sourceDir}"/tests "$@"
+        '';
 
-  watch =
-    checkedShellScript "${binPrefix}watch"
-      ''
-        while true; do
-          ${silver-searcher}/bin/ag -l . "${settings.sourceDir}" | \
-            ${entr}/bin/entr -d ${run}
-        done
-      '';
-}
+    watch =
+      checkedShellScript "${binPrefix}watch"
+        ''
+          while true; do
+            ${silver-searcher}/bin/ag -l . "${settings.sourceDir}" | \
+              ${entr}/bin/entr -d ${run}
+          done
+        '';
+  }
