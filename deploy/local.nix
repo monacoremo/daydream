@@ -149,7 +149,7 @@ rec {
         # shellcheck source=/dev/null
         source "$(${mkEnv} . "$tmpdir")"
 
-        trap 'kill 0; rm -rf $tmpdir' exit
+        trap 'rm -rf $tmpdir' exit
 
         eval "$@"
       '';

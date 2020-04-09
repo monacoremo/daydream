@@ -31,7 +31,7 @@ jobs:
           name: Run tests
           command: |
             su-exec user:user daydream-tests-withtmpenv-run \
-              --junitxml=test-results/junit.xml || true
+              --junitxml=test-results/junit.xml
       - store_test_results:
           path: test-results
   cachix:
