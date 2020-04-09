@@ -21,7 +21,7 @@ jobs:
     - name: Run tests
       run: |
         source env/env
-        daydream-tests-run
+        daydream-tests-run --junitxml=junit.xml
     - uses: actions/upload-artifact@v1
       if: always()
       with:
