@@ -129,6 +129,8 @@ rec {
         export ${settings.vars.docsSrc}="\${settings.sourceDir}/docs"
         export ${settings.vars.docsDir}="\${settings.dir}/docs"
 
+        export ${settings.vars.testsDir}="\${settings.dir}/tests"
+
         export TESTS_SERVICE_BIN="${run}"
         export TESTS_SERVICE_URI="\${settings.URI}"
         export TESTS_DBTEST_BIN="${db.test}"

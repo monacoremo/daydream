@@ -42,6 +42,7 @@ let
     docsSrc = "${docsPrefix}SRC";
     docsDir = "${docsPrefix}DIR";
     docsLogfile = "${docsPrefix}LOGFILE";
+    testsDir = "${prefix}TESTS_DIR";
   };
 
   vals = lib.mapAttrs (name: value: "$" + value) vars;

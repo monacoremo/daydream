@@ -16,7 +16,7 @@ jobs:
             nix-env -iA tests.runWithTmpEnv.bin -f default.nix
       - run:
           name: Set up the test result directory structure
-          command: mkdir -p test-results
+          command: mkdir -p env test-results
       - run:
           name: Grant access to the non-root test user
           command: |
@@ -32,8 +32,19 @@ jobs:
           command: |
             su-exec user:user daydream-tests-withtmpenv-run \
               --junitxml=test-results/junit.xml
+      - run:
+          name: Set up an environment
+          command: |
+            su-exec user:user daydream-local-mkenv . env
+      - run:
+          name: Run tests
+          command: |
+            source env/env
+            su-exec user:user daydream-tests-run --junitxml=test-results/junit2.xml
       - store_test_results:
           path: test-results
+      - store_artifacts:
+          path: env/tests
   cachix:
     docker:
       - image: monacoremo/nix:2020-04-05-05f09348-circleci
