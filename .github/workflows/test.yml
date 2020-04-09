@@ -23,6 +23,7 @@ jobs:
         source env/env
         daydream-tests-run
     - uses: actions/upload-artifact@v1
+      if: always()
       with:
         name: test-output
         path: env/tests
