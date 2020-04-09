@@ -33,14 +33,16 @@ def service_process():
 
     os.setsid()
 
-    # spawn process with a new process group, so that it can be terminated by
-    # itself
-    process = subprocess.Popen(SERVICE_BIN, preexec_fn=os.setsid)
-
-    try:
-        yield process
-    finally:
-        process.send_signal(signal.SIGINT)
+    with open("service.log", "w") as logfile:
+        # spawn process with a new process group, so that it can be terminated
+        # by itself
+        with subprocess.Popen(
+            SERVICE_BIN, preexec_fn=os.setsid, stdout=logfile
+        ) as process:
+            try:
+                yield process
+            finally:
+                process.send_signal(signal.SIGINT)
 
 
 def retry_until_ok(url, retries=100):

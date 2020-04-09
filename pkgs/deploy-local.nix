@@ -27,7 +27,7 @@ module "deploy-local"
           trap "kill 0" exit
 
           ${resetLogs}
-          ${tailLogs} 1>&2 &
+          ${tailLogs} &
 
           ${webapp.build} 2&>> "${settings.webappLogfile}"
           ${docs.build} 2&>> "${settings.docsLogfile}"
@@ -46,7 +46,7 @@ module "deploy-local"
           trap "kill 0" exit
 
           ${resetLogs}
-          ${tailLogs} 1>&2 &
+          ${tailLogs} &
 
           ${db.watch} 2&>> "${settings.dbLogfile}" &
           ${api.watch} 2&>> "${settings.apiLogfile}" &
