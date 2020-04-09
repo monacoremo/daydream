@@ -13,7 +13,7 @@ jobs:
       - run:
           name: Install the application
           command: |
-            nix-env -iA tests.runWithTmpEnv.bin tests.run.bin deployLocal.mkEnv.bin -f default.nix
+            nix-env -iA tests.run.bin deployLocal.mkEnv.bin -f default.nix
       - run:
           name: Set up the test result directory structure
           command: mkdir -p env test-results
@@ -28,11 +28,6 @@ jobs:
             mkdir -p /home/user
             chown user:user /home/user
       - run:
-          name: Run tests
-          command: |
-            su-exec user:user daydream-tests-withtmpenv-run \
-              --junitxml=test-results/junit.xml
-      - run:
           name: Set up an environment
           command: |
             su-exec user:user daydream-local-mkenv . env
@@ -40,7 +35,7 @@ jobs:
           name: Run tests
           command: |
             source env/env
-            su-exec user:user daydream-tests-run --junitxml=test-results/junit2.xml
+            su-exec user:user daydream-tests-run --junitxml=test-results/junit.xml
       - store_test_results:
           path: test-results
       - store_artifacts:

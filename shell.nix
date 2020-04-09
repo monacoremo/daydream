@@ -20,14 +20,12 @@ pkgs.mkShell {
     project.deployLocal.mkEnv.bin
     project.deployLocal.run.bin
     project.deployLocal.watch.bin
-    project.deployLocal.withTmpEnv.bin
     project.ingress.run.bin
     project.webapp.build.bin
     project.webapp.watch.bin
     project.webapp.generatePostgrestBindings.bin
     project.webapp.test.bin
     project.tests.run.bin
-    project.tests.runWithTmpEnv.bin
     project.tests.watch.bin
     project.docs.build.bin
     project.docs.watch.bin

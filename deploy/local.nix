@@ -143,16 +143,4 @@ rec {
 
         echo "$envfile"
       '';
-
-  withTmpEnv =
-    checkedShellScript "${binPrefix}withtmpenv"
-      ''
-        tmpdir="$(mktemp -d)"
-        # shellcheck source=/dev/null
-        source "$(${mkEnv} . "$tmpdir")"
-
-        trap 'rm -rf $tmpdir' exit
-
-        eval "$@"
-      '';
 }
