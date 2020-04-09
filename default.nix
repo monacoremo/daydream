@@ -22,31 +22,31 @@ rec {
 
   docs =
     pkgs.callPackage pkgs/docs.nix
-      { inherit settings checkedShellScript python; };
+      { inherit settings checkedShellScript python module; };
 
   ingress =
     pkgs.callPackage pkgs/ingress.nix
-      { inherit settings checkedShellScript; };
+      { inherit settings checkedShellScript module; };
 
   api =
     pkgs.callPackage pkgs/api.nix
-      { inherit settings checkedShellScript; };
+      { inherit settings checkedShellScript module; };
 
   db =
     pkgs.callPackage pkgs/db.nix
-      { inherit settings checkedShellScript md2sql; };
+      { inherit settings checkedShellScript md2sql module; };
 
   webapp =
     pkgs.callPackage pkgs/webapp.nix
       {
         inherit settings events dbLocal dbLocalSettings deployLocal
-          checkedShellScript postgrestToElm
+          checkedShellScript postgrestToElm module
           ;
       };
 
   dbLocal =
     pkgs.callPackage pkgs/db.nix
-      { inherit checkedShellScript md2sql; settings = dbLocalSettings; };
+      { inherit checkedShellScript md2sql module; settings = dbLocalSettings; };
 
   dbLocalSettings =
     rec {
@@ -56,6 +56,9 @@ rec {
       dbSuperuser = "postgres";
       dbName = "postgres";
       dbSuperuserPassword = "postgres";
+      dbSuperuserURI =
+        "postgres:///${dbName}?host=${dbHost}&user=${dbSuperuser}"
+        + "&password=${dbSuperuserPassword}";
       dbSetupHost = "${dbDir}/setup";
       dbSrc = settings.dbSrc;
       dbSetupURI =
@@ -72,7 +75,7 @@ rec {
     pkgs.callPackage pkgs/deploy-local.nix
       {
         inherit settings checkedShellScript python db api ingress webapp docs
-          randomfreeport logmux
+          randomfreeport logmux module
           ;
       };
 
@@ -81,7 +84,7 @@ rec {
 
   tests =
     pkgs.callPackage pkgs/tests.nix
-      { inherit settings checkedShellScript python deployLocal; };
+      { inherit settings checkedShellScript python deployLocal module; };
 
   checkedShellScript =
     pkgs.callPackage pkgs/checked-shell-script.nix {};
@@ -114,4 +117,11 @@ rec {
       ''
         ${python}/bin/python ${pkgs/utils/randomfreeport.py}
       '';
+
+  module =
+     name: attrs:
+     attrs // pkgs.stdenv.mkDerivation {
+       inherit name;
+       build-inputs = pkgs.lib.attrValues attrs;
+     };
 }

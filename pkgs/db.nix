@@ -7,6 +7,7 @@
 , gnused
 , postgresql_12
 , perl
+, module
 }:
 let
   postgresqlWithPerl =
@@ -57,6 +58,7 @@ let
   binPrefix =
     "${settings.binPrefix}db-";
 in
+module "db"
 rec {
   setup =
     checkedShellScript "${binPrefix}setup"

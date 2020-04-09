@@ -12,11 +12,13 @@
 , docs
 , logmux
 , randomfreeport
+, module
 }:
 let
   binPrefix =
     "${settings.binPrefix}local-";
 in
+module "deploy-local"
 rec {
   run =
     checkedShellScript "${binPrefix}run"

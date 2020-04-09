@@ -4,6 +4,7 @@
 , entr
 , haskellPackages
 , silver-searcher
+, module
 }:
 let
   postgrest =
@@ -24,6 +25,7 @@ let
   binPrefix =
     "${settings.binPrefix}api-";
 in
+module "api"
 rec {
   run =
     checkedShellScript "${binPrefix}run"

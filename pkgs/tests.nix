@@ -7,6 +7,7 @@
 , firefox
 , geckodriver
 , silver-searcher
+, module
 }:
 let
   testPython =
@@ -22,6 +23,7 @@ let
   binPrefix =
     "${settings.binPrefix}tests-";
 in
+module "tests"
 rec {
   run =
     checkedShellScript "${binPrefix}run"

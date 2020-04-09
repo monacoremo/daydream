@@ -10,6 +10,7 @@
 , writeTextDir
 , writeTextFile
 , checkedShellScript
+, module
 }:
 let
   nginxConf =
@@ -154,6 +155,7 @@ let
   binPrefix =
     "${settings.binPrefix}ingress-";
 in
+module "ingress"
 {
   run =
     checkedShellScript "${binPrefix}run"

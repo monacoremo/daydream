@@ -9,6 +9,7 @@
 , postgrestToElm
 , writeText
 , silver-searcher
+, module
 }:
 let
   binPrefix =
@@ -32,6 +33,7 @@ let
         });
       '';
 in
+module "webapp"
 rec {
   build =
     checkedShellScript "${binPrefix}build"

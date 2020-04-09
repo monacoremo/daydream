@@ -3,6 +3,7 @@
 , settings
 , entr
 , silver-searcher
+, module
 }:
 let
   binPrefix =
@@ -11,6 +12,7 @@ let
   sphinx =
     python.withPackages (ps: [ ps.sphinx ]);
 in
+module "docs"
 rec {
   build =
     checkedShellScript "${binPrefix}build"
