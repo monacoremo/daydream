@@ -132,6 +132,7 @@ rec {
         export TESTS_SERVICE_BIN="${run}"
         export TESTS_SERVICE_URI="\${settings.URI}"
         export TESTS_DBTEST_BIN="${db.test}"
+        export TESTS_WEBAPP_BIN="${webapp.test}"
 
         EOF
 
