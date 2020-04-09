@@ -36,10 +36,10 @@ jobs:
           command: |
             source env/env
             su-exec user:user daydream-tests-run --junitxml=test-results/junit.xml
-      - store_test_results:
-          path: test-results
       - store_artifacts:
           path: env/tests
+      - store_test_results:
+          path: test-results
   cachix:
     docker:
       - image: monacoremo/nix:2020-04-05-05f09348-circleci
