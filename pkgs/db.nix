@@ -93,7 +93,7 @@ rec {
           filename=$(basename -- "$f")
           targetpath="${settings.dbDir}/$filename.sql"
           ${gnused}/bin/sed -f ${md2sql} <"$f" >"$targetpath"
-          ${postgresql}/bin/psql "${settings.dbSetupURI}" -X -1 -f "$targetpath"
+          ${postgresql}/bin/psql "${settings.dbSetupURI}" -v ON_ERROR_STOP=1 -f "$targetpath"
         done
 
         ${postgresql}/bin/psql "${settings.dbSetupURI}" << EOF
