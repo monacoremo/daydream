@@ -35,6 +35,7 @@ pkgs.mkShell {
     project.autoformat.bin
     pkgs.curl
     pkgs.elmPackages.elm
+    pkgs.elmPackages.elm-test
     pkgs.silver-searcher
     pkgs.cabal2nix
   ];

@@ -12,7 +12,12 @@ cents value =
     String.concat
         [ thousands value
         , ","
-        , String.padLeft 2 '0' (String.fromInt (modBy 100 (round (value * 100))))
+        , (value * 100)
+            |> round
+            |> abs
+            |> modBy 100
+            |> String.fromInt
+            |> String.padLeft 2 '0'
         ]
 
 
