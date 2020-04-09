@@ -40,6 +40,7 @@ jobs:
   cachix:
     docker:
       - image: monacoremo/nix:2020-04-05-05f09348-circleci
+    resource_class: large
     steps:
       - checkout
       - run:
