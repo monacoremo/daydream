@@ -1,6 +1,6 @@
 let
   nixpkgsVersion =
-    import deploy/nixpkgs-version.nix;
+    import pkgs/nixpkgs-version.nix;
 
   pinnedPkgs =
     builtins.fetchTarball {
@@ -9,7 +9,7 @@ let
     };
 
   pkgs =
-    import pinnedPkgs { overlays = [ (import deploy/overlay.nix) ]; };
+    import pinnedPkgs { overlays = [ (import pkgs/overlay.nix) ]; };
 in
 rec {
   inherit pkgs;
@@ -17,27 +17,27 @@ rec {
   appName = "daydream";
 
   settings =
-    pkgs.callPackage deploy/settings.nix
+    pkgs.callPackage pkgs/settings.nix
       { inherit appName; };
 
   docs =
-    pkgs.callPackage deploy/docs.nix
+    pkgs.callPackage pkgs/docs.nix
       { inherit settings checkedShellScript python; };
 
   ingress =
-    pkgs.callPackage deploy/ingress.nix
+    pkgs.callPackage pkgs/ingress.nix
       { inherit settings checkedShellScript; };
 
   api =
-    pkgs.callPackage deploy/api.nix
+    pkgs.callPackage pkgs/api.nix
       { inherit settings checkedShellScript; };
 
   db =
-    pkgs.callPackage deploy/db.nix
+    pkgs.callPackage pkgs/db.nix
       { inherit settings checkedShellScript md2sql; };
 
   webapp =
-    pkgs.callPackage deploy/webapp.nix
+    pkgs.callPackage pkgs/webapp.nix
       {
         inherit settings events dbLocal dbLocalSettings deployLocal
           checkedShellScript postgrestToElm
@@ -45,7 +45,7 @@ rec {
       };
 
   dbLocal =
-    pkgs.callPackage deploy/db.nix
+    pkgs.callPackage pkgs/db.nix
       { inherit checkedShellScript md2sql; settings = dbLocalSettings; };
 
   dbLocalSettings =
@@ -69,7 +69,7 @@ rec {
     };
 
   deployLocal =
-    pkgs.callPackage deploy/local.nix
+    pkgs.callPackage pkgs/deploy-local.nix
       {
         inherit settings checkedShellScript python db api ingress webapp docs
           randomfreeport logmux
@@ -80,38 +80,38 @@ rec {
     pkgs.python38;
 
   tests =
-    pkgs.callPackage deploy/tests.nix
+    pkgs.callPackage pkgs/tests.nix
       { inherit settings checkedShellScript python deployLocal; };
 
   checkedShellScript =
-    pkgs.callPackage deploy/checked-shell-script.nix {};
+    pkgs.callPackage pkgs/checked-shell-script.nix {};
 
   nixpkgsUpdate =
-    pkgs.callPackage deploy/nixpkgs-update.nix
+    pkgs.callPackage pkgs/nixpkgs-update.nix
       { inherit checkedShellScript; };
 
   logmux =
-    python.pkgs.callPackage deploy/python-packages/logmux.nix {};
+    python.pkgs.callPackage pkgs/python-packages/logmux.nix {};
 
   md2sql =
-    deploy/utils/md2sql.sed;
+    pkgs/utils/md2sql.sed;
 
   sql2md =
-    deploy/utils/sql2md.sed;
+    pkgs/utils/sql2md.sed;
 
   events =
     pkgs.callPackage events/default.nix {};
 
   postgrestToElm =
-    pkgs.callPackage deploy/postgrest-to-elm/default.nix {};
+    pkgs.callPackage pkgs/postgrest-to-elm/default.nix {};
 
   autoformat =
-    pkgs.callPackage deploy/autoformat.nix
+    pkgs.callPackage pkgs/autoformat.nix
       { inherit md2sql sql2md checkedShellScript settings; };
 
   randomfreeport =
     checkedShellScript "randomfreeport"
       ''
-        ${python}/bin/python ${deploy/utils/randomfreeport.py}
+        ${python}/bin/python ${pkgs/utils/randomfreeport.py}
       '';
 }
