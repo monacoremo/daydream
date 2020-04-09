@@ -13,7 +13,7 @@ jobs:
       - run:
           name: Install the application
           command: |
-            nix-env -iA tests.runWithTmpEnv.bin -f default.nix
+            nix-env -iA tests.runWithTmpEnv.bin tests.run.bin deployLocal.mkEnv.bin -f default.nix
       - run:
           name: Set up the test result directory structure
           command: mkdir -p env test-results
