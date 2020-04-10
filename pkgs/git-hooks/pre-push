@@ -1,3 +1,15 @@
 #!/bin/sh
 
-nix-shell --run daydream-tests-run
+set -eu
+
+# Redirect output to stderr.
+exec 1>&2
+
+rootdir="$(git rev-parse --show-toplevel)"
+tmpdir=$(mktemp -d)
+
+trap "rm -rf $tmpdir" exit
+
+cd "$rootdir"
+
+nix-shell --run "cd $tmpdir;daydream-tests-run"
