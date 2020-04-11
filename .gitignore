@@ -4,3 +4,4 @@ geckodriver.log
 .idea
 *.png
 *.log
+result*

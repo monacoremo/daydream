@@ -4,6 +4,7 @@ import time
 import sys
 from contextlib import contextmanager
 import signal
+import multiprocessing
 
 import pytest
 import requests
@@ -68,15 +69,25 @@ def retry_until_ok(url, retries=100):
 
 
 @pytest.fixture(scope="session")
-def webdriver():
+def selenium_session():
     "Fixture for a selenium webdriver"
 
     options = selenium.webdriver.FirefoxOptions()
     options.headless = True
     driver = selenium.webdriver.Firefox(options=options)
 
+    # placeholder for future parallelization, where we might use a pool of
+    # webdrivers
+    lock = multiprocessing.Lock()
+
+    @contextmanager
+    def session():
+        with lock:
+            driver.delete_all_cookies()
+            yield driver
+
     try:
-        yield driver
+        yield session
     finally:
         driver.quit()
 

@@ -15,6 +15,7 @@ let
       (
         ps: [
           ps.pytest
+          #ps.pytest_xdist
           ps.requests
           ps.selenium
         ]
@@ -30,7 +31,7 @@ module "tests"
         ''
           export PATH=${geckodriver}/bin:${firefox}/bin:"$PATH"
 
-          ${testPython}/bin/py.test "${settings.sourceDir}"/tests "$@"
+          ${testPython}/bin/pytest "${settings.sourceDir}"/tests "$@"
         '';
 
     watch =
