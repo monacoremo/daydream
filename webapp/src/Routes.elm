@@ -17,27 +17,26 @@ parse url =
 
 parser : Parser (Route -> a) a
 parser =
-    Parser.s "app"
-        </> Parser.oneOf
-                [ Parser.map Index Parser.top
-                ]
+    Parser.oneOf
+        [ Parser.map Index Parser.top
+        , Parser.s "app"
+            </> Parser.oneOf
+                    [ Parser.map Index Parser.top
+                    ]
+        ]
 
 
 path : Route -> String
 path route =
-    Builder.absolute
-        ("app"
-            :: (case route of
-                    Index ->
-                        [ "" ]
+    case route of
+        Index ->
+            Builder.absolute [ "" ] []
 
-                    Invalid ->
-                        [ "" ]
-               )
-        )
-        []
+        Invalid ->
+            Builder.absolute [ "" ] []
 
 
 isInternal : Url -> Bool
 isInternal url =
-    String.startsWith "/app/" url.path
+    (url.path == "/")
+        || String.startsWith "/app/" url.path
